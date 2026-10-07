@@ -1,0 +1,724 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>My Wallet</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+
+    <style>
+
+        body {
+            background-color: #f5f6f8;
+        }
+
+        .wallet-card {
+            border-radius: 15px;
+        }
+
+        .balance-card {
+            border-radius: 15px;
+        }
+
+        .transaction-card {
+            border-radius: 15px;
+        }
+
+        .transaction-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar h5 {
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            display: block;
+            text-decoration: none;
+            color: #333;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            transition: 0.2s;
+        }
+
+        .sidebar a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .sidebar a.active {
+            background-color: #212529;
+            color: white;
+            font-weight: 600;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+
+        <a class="navbar-brand fw-bold" href="/user/home">
+            JORDAN
+        </a>
+
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav">
+
+            <span class="navbar-toggler-icon"></span>
+
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+
+            <ul class="navbar-nav">
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/home">Home</a>
+                </li>
+ <li class="nav-item">
+
+    <a
+        class="nav-link position-relative"
+        href="/user/wishlist"
+    >
+
+        <i class="bi bi-heart fs-5"></i>
+
+        <% if (wishlistCount > 0) { %>
+
+            <span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+            >
+
+                <%= wishlistCount %>
+
+            </span>
+
+        <% } %>
+
+    </a>
+
+</li>
+<li class="nav-item">
+    <a class="nav-link position-relative" href="/user/cart">
+        <i class="bi bi-cart3 fs-5"></i>
+        
+        <% if (locals.cartCount && cartCount > 0) { %>
+            <span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+            >
+                <%= cartCount %>
+            </span>
+        <% } %>
+    </a>
+</li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/profile">Profile</a>
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+</nav>
+
+<div class="container py-5">
+
+    <div class="row g-4">
+
+
+        <!-- ================================= -->
+        <!-- LEFT SIDEBAR -->
+        <!-- ================================= -->
+
+        <div class="col-md-3">
+
+            <div class="sidebar">
+
+                <h5>
+                    My Account
+                </h5>
+
+
+                <a href="/user/profile"
+                   class="<%= currentPage === 'profile' ? 'active' : '' %>">
+
+                    Profile
+
+                </a>
+
+
+                <a href="/user/address"
+                   class="<%= currentPage === 'address' ? 'active' : '' %>">
+
+                    Address
+
+                </a>
+
+
+                <a href="/user/orders"
+                   class="<%= currentPage === 'orders' ? 'active' : '' %>">
+
+                    Orders
+
+                </a>
+
+
+                <a href="/user/wishlist"
+                   class="<%= currentPage === 'wishlist' ? 'active' : '' %>">
+
+                    Wishlist
+
+                </a>
+
+
+                <a href="/user/wallet"
+                   class="<%= currentPage === 'wallet' ? 'active' : '' %>">
+
+                    My Wallet
+
+                </a>
+
+
+                <a href="/user/logout"
+                   class="text-danger fw-bold">
+
+                    Logout
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================================= -->
+        <!-- RIGHT WALLET CONTENT -->
+        <!-- ================================= -->
+
+        <div class="col-md-9">
+
+
+            <!-- PAGE HEADER -->
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <div>
+
+                    <h2 class="fw-bold mb-1">
+                        My Wallet
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        Manage your wallet balance and transactions
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="btn btn-dark"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addMoneyModal">
+
+                    <i class="bi bi-plus-lg me-1"></i>
+
+                    Add Money
+
+                </button>
+
+            </div>
+
+
+
+            <!-- ================================= -->
+            <!-- BALANCE -->
+            <!-- ================================= -->
+
+            <div class="card border-0 shadow-sm balance-card mb-4">
+
+                <div class="card-body p-4">
+
+                    <div class="row align-items-center">
+
+                        <div class="col-md-8">
+
+                            <p class="text-muted mb-2">
+                                Available Balance
+                            </p>
+
+
+                            <h1 class="fw-bold mb-0">
+
+                                ₹<%= wallet.balance.toFixed(2) %>
+
+                            </h1>
+
+                        </div>
+
+
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+
+                            <i
+                                class="bi bi-wallet2"
+                                style="font-size: 70px;">
+                            </i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ================================= -->
+            <!-- TRANSACTION HISTORY -->
+            <!-- ================================= -->
+
+            <div class="card border-0 shadow-sm transaction-card">
+
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-4">
+
+                        Transaction History
+
+                    </h5>
+
+
+                    <% if (
+                        wallet.transactions &&
+                        wallet.transactions.length > 0
+                    ) { %>
+
+
+                        <div class="table-responsive">
+
+                            <table class="table align-middle">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            Type
+                                        </th>
+
+                                        <th>
+                                            Description
+                                        </th>
+
+                                        <th>
+                                            Amount
+                                        </th>
+
+                                        <th>
+                                            Date
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+
+                                <% wallet.transactions
+                                    .slice()
+                                    .reverse()
+                                    .forEach(transaction => {
+                                %>
+
+
+                                    <tr>
+
+
+                                        <!-- TYPE -->
+
+                                        <td>
+
+                                            <% if (transaction.type === "credit") { %>
+
+                                                <span class="badge text-bg-success">
+                                                    Credit
+                                                </span>
+
+                                            <% } else if (transaction.type === "debit") { %>
+
+                                                <span class="badge text-bg-danger">
+                                                    Debit
+                                                </span>
+
+                                            <% } else if (transaction.type === "refund") { %>
+
+                                                <span class="badge text-bg-primary">
+                                                    Refund
+                                                </span>
+
+                                            <% } %>
+
+                                        </td>
+
+
+
+                                        <!-- DESCRIPTION -->
+
+                                        <td>
+
+                                            <%= transaction.description %>
+
+                                        </td>
+
+
+
+                                        <!-- AMOUNT -->
+
+                                        <td>
+
+                                            <% if (
+                                                transaction.type === "credit" ||
+                                                transaction.type === "refund"
+                                            ) { %>
+
+                                                <span class="text-success fw-semibold">
+
+                                                    +₹<%= transaction.amount.toFixed(2) %>
+
+                                                </span>
+
+                                            <% } else { %>
+
+                                                <span class="text-danger fw-semibold">
+
+                                                    -₹<%= transaction.amount.toFixed(2) %>
+
+                                                </span>
+
+                                            <% } %>
+
+                                        </td>
+
+
+
+                                        <!-- DATE -->
+
+                                        <td>
+
+                                            <%= new Date(
+                                                transaction.createdAt
+                                            ).toLocaleDateString("en-IN") %>
+
+                                        </td>
+
+
+                                    </tr>
+
+
+                                <% }) %>
+
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+
+                    <% } else { %>
+
+
+                        <div class="text-center py-5">
+
+                            <i
+                                class="bi bi-receipt text-muted"
+                                style="font-size: 50px;">
+                            </i>
+
+                            <h6 class="mt-3">
+                                No transactions yet
+                            </h6>
+
+                            <p class="text-muted">
+                                Your wallet transactions will appear here.
+                            </p>
+
+                        </div>
+
+
+                    <% } %>
+
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ================================= -->
+<!-- ADD MONEY MODAL -->
+<!-- ================================= -->
+
+<div
+    class="modal fade"
+    id="addMoneyModal"
+    tabindex="-1">
+
+
+    <div class="modal-dialog modal-dialog-centered">
+
+
+        <div class="modal-content border-0 shadow">
+
+
+            <div class="modal-header">
+
+                <h5 class="modal-title fw-bold">
+
+                    Add Money to Wallet
+
+                </h5>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+
+            <div class="modal-body">
+
+
+                <label
+                    for="amount"
+                    class="form-label">
+
+                    Enter Amount
+
+                </label>
+
+
+                <div class="input-group">
+
+                    <span class="input-group-text">
+                        ₹
+                    </span>
+
+                    <input
+                        type="number"
+                        id="amount"
+                        class="form-control"
+                        placeholder="Enter amount"
+                        min="1"
+                        step="0.01">
+
+                </div>
+
+
+                <div
+                    id="amountError"
+                    class="text-danger small mt-2">
+                </div>
+
+
+            </div>
+
+
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-dark"
+                    id="addMoneyBtn">
+
+                    Add Money
+
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+
+
+
+<script>
+
+const addMoneyBtn =
+    document.getElementById("addMoneyBtn");
+
+const amountInput =
+    document.getElementById("amount");
+
+const amountError =
+    document.getElementById("amountError");
+
+
+addMoneyBtn.addEventListener("click", async () => {
+
+
+    const amount =
+        Number(amountInput.value);
+
+
+    amountError.innerText = "";
+
+
+    // Frontend validation
+
+    if (!amount || amount <= 0) {
+
+        amountError.innerText =
+            "Please enter a valid amount.";
+
+        return;
+
+    }
+
+
+    try {
+
+
+        addMoneyBtn.disabled = true;
+
+        addMoneyBtn.innerText =
+            "Adding...";
+
+
+        const response = await fetch(
+            "/user/wallet/add-money",
+            {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    amount: amount
+                })
+
+            }
+        );
+
+
+        const data =
+            await response.json();
+
+
+        if (!data.success) {
+
+            amountError.innerText =
+                data.message;
+
+            return;
+
+        }
+
+
+        // Reload wallet page
+
+        window.location.reload();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        amountError.innerText =
+            "Something went wrong.";
+
+    } finally {
+
+        addMoneyBtn.disabled = false;
+
+        addMoneyBtn.innerText =
+            "Add Money";
+
+    }
+
+});
+
+</script>
+
+
+</body>
+
+</html>
+```

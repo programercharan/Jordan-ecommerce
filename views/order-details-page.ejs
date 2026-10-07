@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Order Details</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+
+body{
+    background:#f8f9fa;
+}
+
+
+.sidebar{
+    min-height:100vh;
+}
+
+
+.sidebar a{
+    text-decoration:none;
+    display:block;
+    padding:12px;
+    border-radius:8px;
+    color:#333;
+    margin-bottom:8px;
+}
+
+
+.sidebar a:hover,
+.sidebar .active{
+    background:#111;
+    color:white;
+}
+
+
+.order-card{
+    border-radius:15px;
+}
+
+
+.tracker{
+    display:flex;
+    justify-content:space-between;
+    margin:40px 20px;
+}
+
+
+.step{
+    text-align:center;
+    position:relative;
+    flex:1;
+}
+
+
+.step::after{
+
+    content:"";
+
+    position:absolute;
+
+    top:20px;
+
+    right:-50%;
+
+    width:100%;
+
+    height:3px;
+
+    background:#ddd;
+
+    z-index:0;
+
+}
+
+
+.step:last-child::after{
+    display:none;
+}
+
+
+.circle{
+
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    background:#ddd;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:auto;
+    position:relative;
+    z-index:1;
+
+}
+
+
+.active .circle{
+
+    background:#198754;
+
+}
+
+
+.product-image{
+
+    width:100px;
+    height:100px;
+    object-fit:cover;
+    border-radius:10px;
+
+}
+
+
+/* DELIVERY ADDRESS */
+
+.address-card{
+    border-radius:15px;
+}
+
+.address-icon{
+    width:45px;
+    height:45px;
+    border-radius:50%;
+    background:#e9f7ef;
+    color:#198754;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+}
+
+.step.cancelled .circle {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.step.cancelled p {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.step.returned .circle {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: white;
+}
+
+.step.returned p {
+    color: #856404;
+    font-weight: 600;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<nav class="navbar navbar-expand-lg bg-white shadow-sm">
+
+<div class="container">
+
+<a class="navbar-brand fw-bold" href="/user/home">
+JORDAN
+</a>
+
+<div>
+
+<a href="/user/cart" class="btn btn-light">
+<i class="bi bi-cart"></i>
+</a>
+
+<a href="/user/profile" class="btn btn-light">
+<i class="bi bi-person"></i>
+</a>
+
+</div>
+
+</div>
+
+</nav>
+
+<div class="container-fluid">
+
+<div class="row">
+
+<!-- SIDEBAR -->
+
+<div class="col-lg-2 bg-white p-4 sidebar">
+
+<h5 class="fw-bold mb-4">
+My Account
+</h5>
+
+<a href="/user/profile">
+
+<i class="bi bi-person"></i>
+Profile
+
+</a>
+
+<a href="/user/orders" class="active">
+
+<i class="bi bi-box-seam"></i>
+Orders
+
+</a>
+
+<a href="/user/address">
+
+<i class="bi bi-geo-alt"></i>
+Addresses
+
+</a>
+
+<a href="/user/wishlist">
+
+<i class="bi bi-heart"></i>
+Wishlist
+
+</a>
+
+<a href="/user/logout" class="text-danger">
+
+<i class="bi bi-box-arrow-right"></i>
+Logout
+
+</a>
+
+</div>
+
+<!-- MAIN CONTENT -->
+
+<div class="col-lg-10 p-4">
+
+<!-- ORDER DETAILS -->
+
+<div class="card order-card shadow-sm">
+
+<div class="card-body">
+
+<div class="d-flex justify-content-between align-items-center">
+
+<div>
+
+<h3 class="fw-bold">
+Order Details
+</h3>
+
+<p>
+
+Order ID :
+
+<span class="fw-bold text-primary">
+
+<%=order.orderId%>
+
+</span>
+
+</p>
+
+</div>
+
+<div>
+
+<% if(order.orderStatus==="Delivered"){ %>
+
+<a href="/user/order/invoice/<%=order._id%>"
+class="btn btn-success">
+
+<i class="bi bi-download"></i>
+
+Download Invoice
+
+</a>
+
+<% }else{ %>
+
+<button class="btn btn-secondary" disabled>
+
+Invoice Available After Delivery
+
+</button>
+
+<% } %>
+
+</div>
+
+</div>
+
+<hr>
+
+<!-- TRACKER -->
+
+<h5 class="fw-bold">
+    Order Status
+</h5>
+<!-- WHOLE ORDER ACTIONS -->
+
+<%
+const allItemsCancelable =
+    order.orderItems.length > 0 &&
+    order.orderItems.every(item =>
+        ["Pending", "Confirmed"].includes(item.itemStatus)
+    );
+
+const allItemsDelivered =
+    order.orderItems.length > 0 &&
+    order.orderItems.every(item =>
+        item.itemStatus === "Delivered"
+    );
+
+const cancelAllRequested =
+    order.cancelRequest &&
+    order.cancelRequest.requested === true;
+
+const returnAllRequested =
+    order.returnRequest &&
+    order.returnRequest.requested === true;
+%>
+
+
+<div class="d-flex justify-content-end gap-2 mb-4">
+
+    <!-- CANCEL ALL -->
+
+    <% if (
+        allItemsCancelable &&
+        !cancelAllRequested
+    ) { %>
+
+        <button
+            type="button"
+            class="btn btn-danger"
+            id="cancelAllBtn"
+            data-order="<%= order._id %>">
+
+            <i class="bi bi-x-circle"></i>
+            Cancel All Products
+
+        </button>
+
+    <% } %>
+
+
+    <!-- RETURN ALL -->
+
+    <% if (
+        allItemsDelivered &&
+        !returnAllRequested
+    ) { %>
+
+        <button
+            type="button"
+            class="btn btn-warning"
+            id="returnAllBtn"
+            data-order="<%= order._id %>">
+
+            <i class="bi bi-arrow-return-left"></i>
+            Return All Products
+
+        </button>
+
+    <% } %>
+
+
+    <!-- CANCEL REQUEST PENDING -->
+
+    <% if (
+        cancelAllRequested &&
+        order.cancelRequest.status === "Pending"
+    ) { %>
+
+        <span class="badge bg-warning text-dark p-2">
+            Cancel Request Pending
+        </span>
+
+    <% } %>
+
+
+    <!-- RETURN REQUEST PENDING -->
+
+    <% if (
+        returnAllRequested &&
+        order.returnRequest.status === "Pending"
+    ) { %>
+
+        <span class="badge bg-warning text-dark p-2">
+            Return Request Pending
+        </span>
+
+    <% } %>
+
+</div>
+
+<%
+let statusSteps = [];
+
+if (order.orderStatus === "Cancelled") {
+
+    statusSteps = [
+        "Confirmed",
+        "Shipped",
+        "Out for Delivery",
+        "Cancelled"
+    ];
+
+} else if (order.orderStatus === "Returned") {
+
+    statusSteps = [
+        "Confirmed",
+        "Shipped",
+        "Out for Delivery",
+        "Delivered",
+        "Returned"
+    ];
+
+} else {
+
+    statusSteps = [
+        "Confirmed",
+        "Shipped",
+        "Out for Delivery",
+        "Delivered"
+    ];
+}
+
+let current = statusSteps.indexOf(order.orderStatus);
+
+if (order.orderStatus === "Cancelled") {
+    current = statusSteps.length - 1;
+}
+
+if (order.orderStatus === "Returned") {
+    current = statusSteps.length - 1;
+}
+%>
+
+<div class="tracker">
+
+    <% statusSteps.forEach((step, index) => { %>
+
+        <div class="step <%= index <= current ? 'active' : '' %>
+                    <%= step === 'Cancelled' ? 'cancelled' : '' %>
+                    <%= step === 'Returned' ? 'returned' : '' %>">
+
+            <div class="circle">
+
+                <% if (step === "Cancelled") { %>
+
+                    <i class="bi bi-x"></i>
+
+                <% } else if (step === "Returned") { %>
+
+                    <i class="bi bi-arrow-return-left"></i>
+
+                <% } else { %>
+
+                    <i class="bi bi-check"></i>
+
+                <% } %>
+
+            </div>
+
+            <p class="mt-2">
+                <%= step %>
+            </p>
+
+        </div>
+
+    <% }) %>
+
+</div>
+
+<!-- PRODUCTS -->
+
+<div class="card shadow-sm mt-4 order-card">
+
+<div class="card-body">
+
+<h4 class="fw-bold">
+Products
+</h4>
+
+<hr>
+
+<% order.orderItems.forEach(item=>{ %>
+
+<div class="row mb-4">
+
+<!-- IMAGE -->
+
+<div class="col-md-2">
+
+<img
+src="<%=item.productImage%>"
+class="product-image">
+
+</div>
+
+<!-- PRODUCT INFORMATION -->
+
+<div class="col-md-4">
+
+<h5 class="fw-bold">
+<%=item.productName%>
+</h5>
+
+<p class="mb-1">
+
+Size :
+<%=item.size%>
+
+</p>
+
+<p class="mb-1">
+
+Quantity :
+<%=item.quantity%>
+
+</p>
+
+<p class="mb-1">
+
+Payment :
+
+<span class="badge bg-info">
+
+<%=item.paymentStatus%>
+
+</span>
+
+</p>
+
+<span class="badge bg-secondary">
+
+<%=item.itemStatus%>
+
+</span>
+
+</div>
+
+<!-- PRICE INFORMATION -->
+
+<div class="col-md-3">
+
+<p class="mb-1">
+
+Original Price :
+
+<strong>
+₹<%=item.regularPrice%>
+</strong>
+
+</p>
+
+<% if(item.offerApplied){ %>
+
+<p class="mb-1 text-success">
+
+Offer :
+
+<strong>
+
+<%=item.offerDiscountPercentage%>% OFF
+
+</strong>
+
+</p>
+
+<p class="mb-1 text-success">
+
+Offer Discount :
+
+<strong>
+
+-₹<%=item.offerDiscountAmount%>
+
+</strong>
+
+</p>
+
+<% } %>
+
+<p class="mb-1">
+
+Price After Offer :
+
+<strong>
+
+₹<%=item.salePrice%>
+
+</strong>
+
+</p>
+
+<p class="mb-1">
+
+Item Subtotal :
+
+<strong>
+
+₹<%=item.itemSubtotal%>
+
+</strong>
+
+</p>
+
+<% if(item.couponDiscount > 0){ %>
+
+<p class="mb-1 text-danger">
+
+Coupon Discount :
+
+<strong>
+
+-₹<%=item.couponDiscount%>
+
+</strong>
+
+</p>
+
+<% } %>
+
+<p class="fw-bold mt-2">
+
+You Paid :
+
+₹<%=item.paidAmount%>
+
+</p>
+
+</div>
+
+<!-- ACTIONS -->
+
+<div class="col-md-3">
+
+    <!-- RETURN REQUEST STATUS -->
+
+    <% if (item.returnRequest.requested) { %>
+
+        <% if (item.returnRequest.status === "Pending") { %>
+
+            <span class="badge bg-warning text-dark mb-2">
+                Return Request Pending
+            </span>
+
+        <% } else if (item.returnRequest.status === "Accepted") { %>
+
+            <span class="badge bg-success mb-2">
+                Return Accepted
+            </span>
+
+        <% } else if (item.returnRequest.status === "Rejected") { %>
+
+            <span class="badge bg-danger mb-2">
+                Return Rejected
+            </span>
+
+        <% } %>
+
+    <% } %>
+
+
+    <!-- CANCEL BUTTON -->
+
+    <%
+    let cancelAllowed = [
+        "Pending",
+        "Confirmed"
+    ].includes(item.itemStatus);
+    %>
+
+    <% if (cancelAllowed) { %>
+
+        <button
+            class="btn btn-danger btn-sm cancelBtn"
+            data-order="<%= order._id %>"
+            data-item="<%= item._id %>">
+
+            Cancel
+
+        </button>
+
+    <% } %>
+
+
+    <!-- RETURN BUTTON -->
+
+    <% if (
+        item.itemStatus === "Delivered" &&
+        !item.returnRequest.requested
+    ) { %>
+
+        <button
+            class="btn btn-warning btn-sm returnBtn"
+            data-order="<%= order._id %>"
+            data-item="<%= item._id %>">
+
+            Return
+
+        </button>
+
+    <% } %>
+
+
+    <!-- SHIPPED STATUS -->
+
+    <% if (
+        item.itemStatus === "Shipped" ||
+        item.itemStatus === "Out for Delivery"
+    ) { %>
+
+        <button
+            class="btn btn-secondary btn-sm"
+            disabled>
+
+            Cannot Cancel
+
+        </button>
+
+    <% } %>
+
+</div>
+
+</div>
+
+<hr>
+
+<% }) %>
+
+<!-- ORDER PRICE SUMMARY -->
+
+<div class="row justify-content-end">
+
+<div class="col-md-5">
+
+<h5 class="fw-bold mb-3">
+
+Order Summary
+
+</h5>
+
+<div class="d-flex justify-content-between mb-2">
+
+<span>
+Subtotal
+</span>
+
+<strong>
+
+₹<%=order.subtotal%>
+
+</strong>
+
+</div>
+
+<div class="d-flex justify-content-between mb-2">
+
+<span>
+Shipping
+</span>
+
+<strong>
+
+₹50
+
+</strong>
+
+</div>
+
+<% if(order.couponDetails &&
+order.couponDetails.discountValue > 0){ %>
+
+<div class="d-flex justify-content-between mb-2">
+
+<span>
+
+Coupon Discount
+
+<% if(order.couponDetails.discountType==="percentage"){ %>
+
+(<%=order.couponDetails.discountValue%>%)
+
+<% } else { %>
+
+(₹<%=order.couponDetails.discountValue%> OFF)
+
+<% } %>
+
+</span>
+
+<strong class="text-danger">
+
+-₹<%=order.orderItems.reduce(
+(sum,item)=>sum + (item.couponDiscount || 0),
+0
+)%>
+
+</strong>
+
+</div>
+
+<% } else { %>
+
+<div class="d-flex justify-content-between mb-2">
+
+<span>
+Coupon Discount
+</span>
+
+<strong>
+
+₹0
+
+</strong>
+
+</div>
+
+<% } %>
+
+<hr>
+
+<div class="d-flex justify-content-between">
+
+<h5 class="fw-bold">
+
+Grand Total
+
+</h5>
+
+<h5 class="fw-bold">
+
+₹<%=order.grandTotal%>
+
+</h5>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+
+const cancelButtons=document.querySelectorAll(".cancelBtn");
+
+
+cancelButtons.forEach(button=>{
+
+
+button.addEventListener("click",async()=>{
+
+
+const orderId=button.dataset.order;
+
+const itemId=button.dataset.item;
+
+
+
+const { value: reason } = await Swal.fire({
+
+    title: "Cancel Product",
+
+    input: "select",
+
+    inputOptions: {
+
+        "Size mismatch": "Size mismatch",
+
+        "Wrong product received":
+            "Wrong product received",
+
+        "Product quality issue":
+            "Product quality issue",
+
+        "Changed my mind":
+            "Changed my mind",
+
+        "Damaged or defective product":
+            "Damaged or defective product"
+    },
+
+    inputPlaceholder: "Select a reason",
+
+    showCancelButton: true,
+
+    confirmButtonText: "Submit",
+
+    inputValidator: (value) => {
+
+        if (!value) {
+
+            return "Please select a cancellation reason";
+
+        }
+
+    }
+
+});
+
+
+
+if(!reason){
+
+return;
+
+}
+
+
+
+const response=await fetch(
+`/user/orders/item/cancel/${orderId}/${itemId}`,
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+reason
+
+})
+
+}
+
+);
+
+
+
+const data=await response.json();
+
+
+
+if(data.success){
+
+
+Swal.fire({
+
+icon:"success",
+
+title:data.message
+
+}).then(()=>{
+
+location.reload();
+
+})
+
+
+}else{
+
+
+Swal.fire({
+
+icon:"error",
+
+title:data.message
+
+})
+
+
+}
+
+
+
+})
+
+
+})
+
+</script>
+
+<script>
+
+
+const returnButtons=document.querySelectorAll(".returnBtn");
+
+
+returnButtons.forEach(button=>{
+
+
+button.addEventListener("click",async()=>{
+
+
+const orderId=button.dataset.order;
+
+const itemId=button.dataset.item;
+
+
+
+const result = await Swal.fire({
+
+    title:"Return Product",
+
+    input:"select",
+
+    inputOptions:{
+
+        "Size issue":"Size issue",
+
+        "Wrong product received":
+            "Wrong product received",
+
+        "Damaged or defective product":
+            "Damaged or defective product",
+
+        "Product quality not satisfactory":
+            "Product quality not satisfactory"
+
+    },
+
+    inputPlaceholder:"Select a return reason",
+
+    showCancelButton:true,
+
+    confirmButtonText:"Submit",
+
+    inputValidator:(value)=>{
+
+        if(!value){
+
+            return "Please select a return reason";
+
+        }
+
+    }
+
+});
+
+
+if(!result.isConfirmed){
+
+return;
+
+}
+
+
+const reason = result.value;
+
+
+
+const response=await fetch(
+`/user/orders/item/return/${orderId}/${itemId}`,
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+reason
+
+})
+
+}
+
+);
+
+
+
+const data=await response.json();
+
+
+
+if(data.success){
+
+
+Swal.fire({
+
+icon:"success",
+
+title:data.message
+
+}).then(()=>{
+
+location.reload();
+
+})
+
+
+}else{
+
+
+Swal.fire({
+
+icon:"error",
+
+title:data.message
+
+})
+
+
+}
+
+
+
+})
+
+
+})
+
+
+</script>
+
+<script>
+
+const cancelAllBtn = document.getElementById("cancelAllBtn");
+
+if (cancelAllBtn) {
+
+    cancelAllBtn.addEventListener("click", async () => {
+
+        const orderId = cancelAllBtn.dataset.order;
+
+
+        const { value: reason } = await Swal.fire({
+
+            title: "Cancel Entire Order",
+
+            text: "Are you sure you want to cancel all products in this order?",
+
+            input: "select",
+
+            inputOptions: {
+
+                "Changed my mind": "Changed my mind",
+
+                "Wrong product ordered":
+                    "Wrong product ordered",
+
+                "Found a better price":
+                    "Found a better price",
+
+                "Other reason":
+                    "Other reason"
+
+            },
+
+            inputPlaceholder: "Select a cancellation reason",
+
+            showCancelButton: true,
+
+            confirmButtonText: "Cancel All Products",
+
+            confirmButtonColor: "#dc3545",
+
+            inputValidator: (value) => {
+
+                if (!value) {
+
+                    return "Please select a cancellation reason";
+
+                }
+
+            }
+
+        });
+
+
+        if (!reason) {
+
+            return;
+
+        }
+
+
+        try {
+
+            const response = await fetch(
+                `/user/orders/item/all/cancel/${orderId}`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        reason
+                    })
+                }
+            );
+
+
+            const data = await response.json();
+                console.log(data)
+
+            if (data.success) {
+
+                await Swal.fire({
+
+                    icon: "success",
+
+                    title: "cancelled succesfully",
+
+                    text: data.message
+
+                });
+
+                location.reload();
+
+
+            } else {
+
+                Swal.fire({
+
+                    icon: "error",
+
+                    title: "Unable to Cancel",
+
+                    text: data.message
+
+                });
+
+            }
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            Swal.fire({
+
+                icon: "error",
+
+                title: "Something went wrong",
+
+                text: "Unable to process the cancellation request."
+
+            });
+
+        }
+
+    });
+
+}
+
+</script>
+
+<script>
+
+const returnAllBtn = document.getElementById("returnAllBtn");
+
+if (returnAllBtn) {
+
+    returnAllBtn.addEventListener("click", async () => {
+
+        const orderId = returnAllBtn.dataset.order;
+
+
+        const result = await Swal.fire({
+
+            title: "Return Entire Order",
+
+            text: "Are you sure you want to request a return for all products?",
+
+            input: "select",
+
+            inputOptions: {
+
+                "Size issue":
+                    "Size issue",
+
+                "Wrong product received":
+                    "Wrong product received",
+
+                "Damaged or defective product":
+                    "Damaged or defective product",
+
+                "Product quality not satisfactory":
+                    "Product quality not satisfactory"
+
+            },
+
+            inputPlaceholder: "Select a return reason",
+
+            showCancelButton: true,
+
+            confirmButtonText: "Request Return",
+
+            confirmButtonColor: "#ffc107",
+
+            inputValidator: (value) => {
+
+                if (!value) {
+
+                    return "Please select a return reason";
+
+                }
+
+            }
+
+        });
+
+
+        if (!result.isConfirmed) {
+
+            return;
+
+        }
+
+
+        const reason = result.value;
+
+
+        try {
+
+            const response = await fetch(
+                `/user/orders/item/all/return/${orderId}`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        reason
+                    })
+                }
+            );
+
+
+            const data = await response.json();
+
+
+            if (data.success) {
+
+                await Swal.fire({
+
+                    icon: "success",
+
+                    title: "Return Request Submitted",
+
+                    text: data.message
+
+                });
+
+                location.reload();
+
+
+            } else {
+
+                Swal.fire({
+
+                    icon: "error",
+
+                    title: "Unable to Request Return",
+
+                    text: data.message
+
+                });
+
+            }
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            Swal.fire({
+
+                icon: "error",
+
+                title: "Something went wrong",
+
+                text: "Unable to process the return request."
+
+            });
+
+        }
+
+    });
+
+}
+
+</script>
+
+</body>
+
+</html>

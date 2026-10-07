@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= product.name %></title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+
+    <style>
+        #mainImage {
+            width: 100%;
+            height: 450px;
+            object-fit: cover;
+            cursor: zoom-in;
+            transition: transform .2s;
+        }
+
+        .thumb {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        .color-link {
+
+    text-decoration: none;
+
+}
+
+
+.color-box {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 9px 14px;
+
+    margin-right: 10px;
+
+    margin-bottom: 10px;
+
+    border: 2px solid #d5d5d5;
+
+    border-radius: 8px;
+
+    background-color: white;
+
+    color: #212529;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+
+}
+
+
+.color-box:hover {
+
+    border-color: #212529;
+
+    transform: translateY(-2px);
+
+}
+
+
+/* Currently viewed color */
+
+.color-box.selected-color {
+
+    border-color: #212529;
+
+    background-color: #f1f1f1;
+
+    box-shadow:
+        0 0 0 4px rgba(0, 0, 0, 0.12);
+
+}
+
+
+.color-check {
+
+    width: 20px;
+
+    height: 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background-color: #212529;
+
+    color: white;
+
+    font-size: 12px;
+
+}
+
+        .size-box {
+    display: inline-block;
+    padding: 8px 14px;
+    border: 1px solid #ccc;
+    margin-right: 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.2s;
+}
+
+.size-box:hover {
+    border-color: black;
+    transform: scale(1.05);
+}
+
+.size-box.active {
+    background: black;
+    color: white;
+    border-color: black;
+}
+
+.size-box.disabled {
+    background: #eee;
+    color: #999;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+/* Related Products */
+
+.related-card {
+    border-radius: 10px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    height: 100%;
+    transition: 0.2s;
+}
+
+.related-card:hover {
+    transform: translateY(-3px);
+}
+
+.related-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.related-body {
+    padding: 15px;
+}
+
+.related-title {
+    font-weight: 600;
+    height: 45px;
+    overflow: hidden;
+}
+
+.related-btn {
+    width: 100%;
+}
+
+#addToCartBtn,
+#wishlistBtn{
+    height:48px;
+    transition:all .25s ease;
+}
+
+#addToCartBtn:hover,
+#wishlistBtn:hover{
+    background:#212529;
+    color:#fff;
+    transform:translateY(-2px);
+}
+
+#wishlistBtn.active{
+    background:#dc3545;
+    border-color:#dc3545;
+    color:#fff;
+}
+    </style>
+</head>
+
+<body>
+ <script>console.log("hiii")</script>
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">JORDAN</a>
+
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="/user/home">Home</a></li>
+                   <li class="nav-item">
+
+        <li class="nav-item">
+    <!-- 1. Added id="wishlist-nav" -->
+    <a class="nav-link position-relative" href="/user/wishlist" id="wishlist-nav">
+        <i class="bi bi-heart fs-5"></i>
+        
+        <!-- 2. Keep the span container always present, but hide it if count is 0 -->
+        <span 
+            id="wishlist-badge" 
+            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger <%= wishlistCount === 0 ? 'd-none' : '' %>"
+        >
+            <%= wishlistCount > 0 ? wishlistCount : '' %>
+        </span>
+    </a>
+</li>
+
+</li>
+
+<li class="nav-item">
+    <a class="nav-link position-relative" href="/user/cart">
+        <i class="bi bi-cart3 fs-5"></i>
+        
+        <!-- The span is always rendered now, but hidden if cartCount is 0 or undefined -->
+        <span
+            id="cart-badge"
+            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger <%= (locals.cartCount && cartCount > 0) ? '' : 'd-none' %>"
+        >
+            <%= (locals.cartCount && cartCount > 0) ? cartCount : '' %>
+        </span>
+    </a>
+</li>
+
+        </li>
+            <li class="nav-item"><a class="nav-link" href="/user/profile">Profile</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+<!-- BREADCRUMB -->
+<nav class="mt-3">
+    <% if (locals.breadcrumbs && locals.breadcrumbs.length) { %>
+
+        <% locals.breadcrumbs.forEach((item, index) => { %>
+
+            <% if (item.url && index !== locals.breadcrumbs.length - 1) { %>
+                <a href="<%= item.url %>"><%= item.name %></a>
+            <% } else { %>
+                <span><%= item.name %></span>
+            <% } %>
+
+            <% if (index !== locals.breadcrumbs.length - 1) { %>
+                <span> &gt; </span>
+            <% } %>
+
+        <% }) %>
+
+    <% } %>
+
+</nav>
+<div class="row">
+
+<!-- LEFT -->
+<div class="col-md-6">
+
+    <img id="mainImage" src="<%= selectedVariant.images[0] %>">
+
+    <div class="mt-2">
+        <% selectedVariant.images.forEach(img => { %>
+            <img class="thumb" src="<%= img %>" onclick="changeImage('<%= img %>')">
+        <% }) %>
+    </div>
+
+</div>
+
+<!-- RIGHT -->
+<div class="col-md-6">
+
+    <h2><%= product.name %></h2>
+
+    <p>⭐⭐⭐⭐☆ 4.5</p>
+
+    <!-- <h4>
+        ₹<%= selectedVariant.salePrice %>
+        <del>₹<%= selectedVariant.regularPrice %></del>
+    </h4> -->
+    
+<h4>
+
+    <% if (offerPrice.offerApplied) { %>
+
+        ₹<%= offerPrice.finalPrice %>
+
+        <del class="text-muted">
+            ₹<%= selectedVariant.salePrice %>
+        </del>
+
+        <span class="text-danger ms-2">
+            <%= offerPrice.discountPercentage %>% OFF
+        </span>
+
+    <% } else { %>
+
+        ₹<%= selectedVariant.salePrice %>
+
+        <del class="text-muted">
+            ₹<%= selectedVariant.regularPrice %>
+        </del>
+
+    <% } %>
+
+</h4>
+
+    <!-- COLORS -->
+<div class="mt-3">
+
+    <h6 class="mb-3">
+        Colors
+    </h6>
+
+    <% variants.forEach(v => { %>
+
+        <a
+            href="/user/product/<%= product._id %>/<%= v._id %>"
+            class="color-link"
+        >
+
+            <span
+                class="color-box
+                <%= String(v._id) === String(selectedVariant._id)
+                    ? 'selected-color'
+                    : ''
+                %>"
+            >
+
+                <span class="color-name">
+                    <%= v.color %>
+                </span>
+
+                <% if(
+                    String(v._id) ===
+                    String(selectedVariant._id)
+                ){ %>
+
+                    <i class="bi bi-check-lg color-check"></i>
+
+                <% } %>
+
+            </span>
+
+        </a>
+
+    <% }) %>
+
+</div>
+
+<div class="mt-3">
+    <h6>Sizes</h6>
+
+    <div class="d-flex gap-3 flex-wrap">
+
+        <% selectedVariant.sizeAndStock.forEach(s => { %>
+
+            <div class="text-center">
+
+                <span 
+                    class="size-box <%= s.stock === 0 ? 'out-of-stock' : '' %>"
+                    data-size="<%= s.size %>"
+                    data-stock="<%= s.stock %>"
+                >
+                    <%= s.size %>
+                </span>
+
+                <% if (s.stock > 0) { %>
+                    <small class="d-block text-success mt-1">
+                        <%= s.stock %> left
+                    </small>
+                <% } else { %>
+                    <small class="d-block text-danger mt-1">
+                        Out of Stock
+                    </small>
+                <% } %>
+
+            </div>
+
+        <% }) %>
+
+    </div>
+</div>
+
+<div class="d-flex gap-3 mt-3">
+
+    <button
+        id="addToCartBtn"
+        class="btn btn-outline-dark d-flex align-items-center justify-content-center px-4">
+
+        <i class="bi bi-cart3 me-2"></i>
+        Add to Cart
+
+    </button>
+
+    <button
+        id="wishlistBtn"
+        class="btn btn-outline-dark d-flex align-items-center justify-content-center px-4">
+
+        <i class="bi bi-heart me-2"></i>
+        Add to Wishlist
+
+    </button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- DESCRIPTION -->
+<div class="mt-5">
+    <h4>Description</h4>
+    <p><%= product.description %></p>
+</div>
+
+<!-- RELATED -->
+<div class="mt-5">
+
+    <h4 class="mb-3">Related Products</h4>
+
+    <div class="row g-4">
+
+        <% relatedProducts.forEach(p => { %>
+
+            <% relatedProductsVariants.forEach(v => { %>
+
+                <% if(v && p._id.toString() === v.productId.toString()){ %>
+
+                    <div class="col-md-3 col-sm-6">
+
+                        <div class="card related-card">
+
+                            <img 
+                                src="<%= v.images?.[0] %>" 
+                                class="related-image"
+                            >
+
+                            <div class="related-body">
+
+                                <h6 class="related-title">
+                                    <%= p.name %>
+                                </h6>
+
+                                <a 
+                                  href="/user/product/<%= v._id %>" 
+                                  class="btn btn-dark btn-sm related-btn">
+                                    View Product
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                <% } %>
+
+            <% }) %>
+
+        <% }) %>
+
+    </div>
+
+</div>
+
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+const wishlistBtn=document.getElementById("wishlistBtn")
+
+if(<%- JSON.stringify(inWishlist || false) %>){
+    console.log("is executing....")
+turnOnWishbutton()
+}
+
+function turnOnWishbutton(){
+    const heartIcon=wishlistBtn.querySelector("i")
+    heartIcon.classList.add("bi-heart-fill");
+    heartIcon.classList.add("text-danger");
+    
+    heartIcon.classList.remove("bi-heart");
+}
+
+function changeImage(img) {
+    document.getElementById("mainImage").src = img;
+}
+
+// SIMPLE ZOOM
+const img = document.getElementById("mainImage");
+
+img.addEventListener("mousemove", (e) => {
+    const rect = img.getBoundingClientRect();
+
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    img.style.transformOrigin = `${x}% ${y}%`;
+    img.style.transform = "scale(2)";
+});
+
+img.addEventListener("mouseleave", () => {
+    img.style.transform = "scale(1)";
+});
+let selectedSize = null;
+let selectedStock=null
+document.querySelectorAll(".size-box").forEach(box => {
+
+    box.addEventListener("click", () => {
+
+        document.querySelectorAll(".size-box")
+            .forEach(b => b.classList.remove("active"));
+
+        box.classList.add("active");
+
+        selectedSize = Number(box.dataset.size);
+        selectedStock = Number(box.dataset.stock);
+
+    });
+
+});
+
+
+wishlistBtn.addEventListener("click",async(e)=>{
+    console.log("eventLister for wishlist executed")
+    const heartIcon=wishlistBtn.querySelector("i")
+    console.log("heartIcon.classList.contains(bi-heart)->",heartIcon.classList.contains("bi-heart"))
+    console.log("heartIcon.classList.contains(bi-heart-fil)->",heartIcon.classList.contains("bi-heart-fil"))
+    try{
+    if(heartIcon.classList.contains("bi-heart"))
+    {
+         console.log("inside the if block")
+
+
+        if (!selectedSize) {
+            return Swal.fire({
+                icon:"info",
+                title:"Please Select Size"
+            })
+        }
+
+
+
+        wishlistBtn.disabled=true
+        const res=await fetch("/user/wishlist/addAndRemove",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({
+                variantId: "<%= selectedVariant._id %>",
+                size: selectedSize,
+                action:"add"
+            })
+        }) 
+        const data=await res.json() 
+        console.log(data) 
+        if(data.success)
+        {
+            heartIcon.classList.toggle("bi-heart");
+            heartIcon.classList.toggle("bi-heart-fill");
+            heartIcon.classList.toggle("text-danger");
+            wishlistBtn.disabled=false
+
+            const badge = document.getElementById('wishlist-badge');
+            
+            // Update the count inside the badge
+            badge.textContent = data.newTotalCount;
+            
+            // Make sure the badge is visible (remove Bootstrap's 'd-none' utility class)
+            if (data.newTotalCount > 0) {
+                badge.classList.remove('d-none');
+            } else {
+                badge.classList.add('d-none');
+            }
+
+            Swal.fire({
+                title:"Product Added To Wishlist",
+                icon:"success"
+            })
+        }
+        else if(data.alert){
+            console.log("alert executed")
+            return Swal.fire({
+                icon:"error",
+                title:"User Haven't logged login",
+                confirmButtonText:"Yes,Login",
+            }).then((result)=>{
+                if(result.isConfirmed){
+                    window.location.href="/user/login"
+                }
+            })
+        }
+    }else if(heartIcon.classList.contains("bi-heart-fill")){
+        console.log("inide the else ")
+        wishlistBtn.disabled=true
+        const res=await fetch("/user/wishlist/addAndRemove",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({
+                variantId: "<%= selectedVariant._id %>",
+                size: selectedSize,
+                action:"remove"
+            })
+        }) 
+        const data=await res.json()  
+        console.log("data->",data)
+        if(data.success){
+            console.log("inside the data.sucess")
+             heartIcon.classList.toggle("bi-heart");
+    
+            return Swal.fire({
+                title:"Product Removed From Wishlist",
+                icon:"success"
+            })
+        }
+        else{
+             Swal.fire({
+                title:"Something went wrong try again later",
+                icon:"error"
+            })
+        }
+
+    }
+}catch(error){
+    console.log(error)
+}
+
+})
+
+//add to cart
+document.getElementById("addToCartBtn")
+.addEventListener("click", async () => {
+console.log("event Triggered?")
+
+
+
+    if (!selectedSize) {
+        return Swal.fire({
+            icon:"info",
+            title:"Please Select Size"
+        })
+    }
+
+    if(!selectedStock){
+        return Swal.fire({
+            icon:"info",
+            title:`Size ${selectedSize} is out of stock. Please try another size.`
+        })
+    }
+
+    const res = await fetch("/user/cart/add", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            variantId: "<%= selectedVariant._id %>",
+            size: selectedSize,
+            quantity: 1
+        })
+    });
+
+    const data = await res.json();
+
+    console.log("data->",data)
+    if (data.success) {
+
+            const cartBadge = document.getElementById('cart-badge');
+            const count = data.newTotalCartCount;
+
+            // 3. Update the inner text of the badge
+            cartBadge.textContent = count;
+            
+            // 4. Show or hide the badge depending on the item count
+            if (count > 0) {
+                cartBadge.classList.remove('d-none');
+            } else {
+                cartBadge.classList.add('d-none');
+            }
+
+        return Swal.fire({
+            icon:"info",
+            title:"Added to cart"
+        })
+    } else {
+            if(data.message){
+
+                   return  Swal.fire({
+                    icon: 'info',
+                    title: data.message
+                    }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        window.location.reload();
+                    }
+                    })
+
+        }
+
+       Swal.fire({
+        title:"User Haven't Logged In",
+        text:"Would You Like To Login",
+        icon:"info",
+        showCancelButton:true,
+        confirmButtonText:"Yes,Login",
+        cancelButtonText:"Later"
+       }).then((result)=>{
+        if(result.isConfirmed){
+            window.location.href="/user/login"
+        }
+       })
+    }
+});
+
+</script>
+
+<script>
+    const alertData =
+<%- JSON.stringify(alert || null) %>
+console.log("alertData->",alertData)
+if(alertData){
+
+    Swal.fire({
+
+        icon: alertData.type,
+        title: alertData.message,
+        confirmButtonText:"OK"
+
+    })
+
+}
+</script>
+
+</body>
+</html>

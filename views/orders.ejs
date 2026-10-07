@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>My Orders</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+</head>
+
+<body class="bg-light">
+
+<!-- NAVBAR -->
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+
+<div class="container">
+
+<a class="navbar-brand fw-bold" href="/user/home">
+JORDAN
+</a>
+
+<button
+class="navbar-toggler"
+data-bs-toggle="collapse"
+data-bs-target="#navMenu">
+
+<span class="navbar-toggler-icon"></span>
+
+</button>
+
+<div class="collapse navbar-collapse" id="navMenu">
+
+<ul class="navbar-nav ms-auto align-items-center">
+
+<form
+action="/user/orders"
+method="GET"
+class="d-flex ms-auto me-3">
+
+    <input
+    type="text"
+    name="search"
+    class="form-control me-2"
+    placeholder="Search Order ID"
+    value="<%= search || '' %>">
+
+    <button
+    class="btn btn-dark me-2"
+    type="submit">
+
+        Search
+
+    </button>
+
+    <a
+    href="/user/orders"
+    class="btn btn-outline-secondary">
+
+        Clear
+
+    </a>
+
+</form>
+
+
+
+<li class="nav-item">
+
+    <a
+        class="nav-link position-relative"
+        href="/user/wishlist"
+    >
+
+        <i class="bi bi-heart fs-5"></i>
+
+        <% if (wishlistCount > 0) { %>
+
+            <span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+            >
+
+                <%= wishlistCount %>
+
+            </span>
+
+        <% } %>
+
+    </a>
+
+</li>
+<li class="nav-item">
+    <a class="nav-link position-relative" href="/user/cart">
+        <i class="bi bi-cart3 fs-5"></i>
+        
+        <% if (locals.cartCount && cartCount > 0) { %>
+            <span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+            >
+                <%= cartCount %>
+            </span>
+        <% } %>
+    </a>
+</li>
+
+
+
+<li class="nav-item">
+
+<a class="nav-link"
+href="/user/profile">
+
+Profile
+
+</a>
+
+</li>
+
+</ul>
+
+</div>
+
+</div>
+
+</nav>
+
+
+
+<div class="container py-5">
+
+<div class="row">
+
+
+<!-- SIDEBAR -->
+
+
+<div class="col-lg-3 mb-4">
+
+<div class="card shadow-sm border-0 rounded-4">
+
+<div class="list-group list-group-flush">
+
+<a
+href="/user/profile"
+class="list-group-item list-group-item-action">
+
+<i class="bi bi-person me-2"></i>
+
+Profile
+
+</a>
+
+<a
+href="/user/orders"
+class="list-group-item list-group-item-action active">
+
+<i class="bi bi-box-seam me-2"></i>
+
+Orders
+
+</a>
+
+<a
+href="/user/address"
+class="list-group-item list-group-item-action">
+
+<i class="bi bi-geo-alt me-2"></i>
+
+Addresses
+
+</a>
+
+
+<a
+href="/user/wallet"
+class="list-group-item list-group-item-action">
+
+<i class="bi bi-wallet2 me-2"></i>
+
+wallet
+
+</a>
+
+<a
+href="/user/wishlist"
+class="list-group-item list-group-item-action">
+
+<i class="bi bi-heart me-2"></i>
+
+Wishlist
+
+</a>
+
+<a
+href="/user/logout"
+class="list-group-item list-group-item-action text-danger">
+
+<i class="bi bi-box-arrow-right me-2"></i>
+
+Logout
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- RIGHT SIDE -->
+
+<!-- RIGHT SIDE -->
+
+<div class="col-lg-9">
+
+<div class="card shadow-sm border-0 rounded-4">
+
+<div class="card-body p-4">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <h3 class="fw-bold mb-0">
+
+        My Orders
+
+    </h3>
+
+    <select
+    class="form-select"
+    id="sortOrders"
+    style="width:200px;">
+
+        <option
+        value="newest"
+        <%= sort==="newest" ? "selected" : "" %>>
+
+            Newest First
+
+        </option>
+
+        <option
+        value="oldest"
+        <%= sort==="oldest" ? "selected" : "" %>>
+
+            Oldest First
+
+        </option>
+
+    </select>
+
+</div>
+
+
+
+
+<!-- ORDER CARD -->
+
+<% if(orders.length===0){ %>
+
+<div class="alert alert-warning">
+
+No Orders Found.
+
+</div>
+
+<% } else { %>
+
+<% orders.forEach(order=>{ %>
+
+<div class="card border rounded-4 mb-4">
+
+<div class="card-body">
+
+<div class="d-flex justify-content-between flex-wrap">
+
+<div>
+
+<h5 class="fw-bold">
+
+Order ID :
+
+<span class="text-primary">
+
+<%= order.orderId %>
+
+</span>
+
+</h5>
+
+<p class="text-muted mb-0">
+
+Ordered on
+
+<%= new Date(order.createdAt).toLocaleDateString("en-IN") %>
+
+</p>
+
+</div>
+
+<div>
+
+<%
+let badge="secondary";
+
+if(order.orderStatus==="Confirmed"){
+badge="success";
+}
+else if(order.orderStatus==="Pending"){
+badge="warning text-dark";
+}
+else if(order.orderStatus==="Delivered"){
+badge="primary";
+}
+else if(order.orderStatus==="Cancelled"){
+badge="danger";
+}
+%>
+
+<span class="badge bg-<%= badge %> fs-6">
+
+<%= order.orderStatus %>
+
+</span>
+
+</div>
+
+</div>
+
+<hr>
+
+
+
+<!-- PRODUCT -->
+
+<% order.orderItems.forEach(item=>{ %>
+
+<div class="row align-items-center mb-3">
+
+<div class="col-md-2">
+
+<img
+src="<%= item.productImage %>"
+class="img-fluid rounded">
+
+</div>
+
+<div class="col-md-7">
+
+<h6 class="fw-bold">
+
+<%= item.productName %>
+
+</h6>
+
+<p class="mb-1">
+
+Size :
+<%= item.size %>
+
+</p>
+
+<p class="mb-0">
+
+Quantity :
+<%= item.quantity %>
+
+</p>
+
+</div>
+
+<div class="col-md-3 text-end">
+
+<h6>
+
+Subtotal
+
+</h6>
+
+<h5>
+
+₹<%= item.salePrice * item.quantity %>
+
+</h5>
+
+</div>
+
+</div>
+
+<hr>
+
+<% }) %>
+
+
+<div class="d-flex justify-content-between align-items-center flex-wrap">
+
+<div>
+
+<h5 class="fw-bold">
+
+Grand Total
+
+</h5>
+
+<h4 class="text-success">
+
+₹<%= order.grandTotal %>
+
+</h4>
+
+</div>
+
+<a
+href="/user/orders/<%= order._id %>"
+class="btn btn-dark">
+
+View Details
+
+<i class="bi bi-arrow-right ms-1"></i>
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<% }) %>
+
+<% } %>
+
+
+
+<!-- PAGINATION -->
+
+<nav>
+
+<ul class="pagination justify-content-center mt-4">
+
+<% if(currentPage>1){ %>
+
+<li class="page-item">
+
+<a
+class="page-link"
+href="?page=<%= currentPage-1 %>&search=<%= search || '' %>&sort=<%= sort %>">
+
+Previous
+
+</a>
+
+</li>
+
+<% } %>
+
+<% for(let i=1;i<=totalPages;i++){ %>
+
+<li class="page-item <%= currentPage===i ? 'active' : '' %>">
+
+<a
+class="page-link"
+href="?page=<%= i %>&search=<%= search || '' %>&sort=<%= sort %>">
+
+<%= i %>
+
+</a>
+
+</li>
+
+<% } %>
+
+<% if(currentPage<totalPages){ %>
+
+<li class="page-item">
+
+<a
+class="page-link"
+href="?page=<%= currentPage+1 %>&search=<%= search || '' %>&sort=<%= sort %>">
+
+Next
+
+</a>
+
+</li>
+
+<% } %>
+
+</ul>
+
+</nav>
+
+
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+
+const sort = document.getElementById("sortOrders");
+
+sort.addEventListener("change", () => {
+
+    const url = new URL(window.location.href);
+
+    url.searchParams.set("sort", sort.value);
+
+    window.location.href = url;
+
+});
+
+</script>
+<script>
+
+const clearBtn = document.getElementById("clearSearch");
+
+const searchInput = document.getElementById("searchInput");
+
+clearBtn.addEventListener("click", () => {
+
+    searchInput.value = "";
+
+});
+
+</script>
+</body>
+
+</html>

@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cart</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <style>
+
+        body{
+            background:#f5f5f5;
+        }
+
+    .cart-card {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 10px 15px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+      .cart-image {
+        max-width: 100px;
+        max-height: 100px;
+        object-fit: cover;
+        border-radius: 4px;
+        display: block;
+        margin: 0 auto;
+    }
+    .cart-card h4 {
+        font-size: 1.05rem;
+        margin-bottom: 4px;
+        font-weight: 600;
+    }
+        .cart-card p {
+        font-size: 0.85rem;
+        margin-bottom: 2px;
+        color: #555;
+    }
+    .qty-btn {
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        line-height: 26px;
+        text-align: center;
+        border: 1px solid #ccc;
+        background: #f8f9fa;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+     .qty-value {
+        display: inline-block;
+        min-width: 25px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .remove-btn {
+        padding: 4px 10px;
+        font-size: 0.8rem;
+    }
+    .badge {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        margin-top: 4px;
+        display: inline-block;
+    }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+
+        <a class="navbar-brand fw-bold" href="/user/home">
+            JORDAN
+        </a>
+
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav">
+
+            <span class="navbar-toggler-icon"></span>
+
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+
+            <ul class="navbar-nav">
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/home">Home</a>
+                </li>
+
+<li class="nav-item">
+
+    <a
+        class="nav-link position-relative"
+        href="/user/wishlist"
+    >
+
+        <i class="bi bi-heart fs-5"></i>
+
+        <% if (wishlistCount > 0) { %>
+
+            <span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+            >
+
+                <%= wishlistCount %>
+
+            </span>
+
+        <% } %>
+
+    </a>
+
+</li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/profile">Profile</a>
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+</nav>
+    
+<div class="container py-4">
+    <h2 class="mb-4">Shopping Cart</h2>
+
+    <% if(cartItems.length === 0){ %>
+        <div class="alert alert-warning">
+            Cart is Empty
+        </div>
+    <% } %>
+
+    <div class="row">
+        <!-- LEFT SIDE: Cart Items (Takes up 8 columns out of 12) -->
+        <div class="col-lg-8">
+            <% cartItems.forEach(item => { %>
+                <div class="cart-card">
+                    <div class="row align-items-center">
+                        <!-- Image Column -->
+                        <div class="col-md-2 col-3">
+                            <img src="<%= item.variantId.images[0] %>" class="cart-image" alt="Product Image">
+                        </div>
+
+                        <!-- Details Column -->
+                        <div class="col-md-5 col-9">
+                            <h4><%= item.productId.name %></h4>
+                            <p>Color: <strong><%= item.variantId.color %></strong> | Size: <strong><%= item.size %></strong></p>
+                            <p class="text-truncate text-muted" style="max-width: 350px;"><%= item.productId.description %></p>
+<p>
+
+    Price:
+
+    <% if (item.offerPrice.offerApplied) { %>
+
+        <span class="price text-success fw-semibold">
+
+            ₹<%= item.offerPrice.finalPrice %>
+
+        </span>
+
+        <del class="text-muted ms-1">
+
+            ₹<%= item.variantId.salePrice %>
+
+        </del>
+
+        <span class="text-danger ms-1">
+
+            <%= item.offerPrice.discountPercentage %>% OFF
+
+        </span>
+
+    <% } else { %>
+
+        <span class="price">
+
+            ₹<%= item.variantId.salePrice %>
+
+        </span>
+
+    <% } %>
+
+
+    |
+
+    Subtotal:
+
+    <strong>
+
+        ₹<span class="subtotal">
+
+            <%= item.calculatedSubtotal %>
+
+        </span>
+
+    </strong>
+
+</p>
+
+                            <!-- Availability Badges -->
+                            <% const sizeData = item.variantId.sizeAndStock.find(s => s.size === item.size); %>
+                            <% if(!item.productId.list || !item.variantId.list){ %>
+                                <span class="badge bg-danger">UNAVAILABLE</span>
+                            <% } else if(sizeData && sizeData.stock <= 0){ %>
+                                <span class="badge bg-warning text-dark">OUT OF STOCK</span>
+                            <% } else { %>
+                                <span class="badge bg-success">IN STOCK</span>
+                            <% } %>
+                        </div>
+
+                        <!-- Quantity Actions Column -->
+                        <div class="col-md-3 col-6 text-md-center mt-2 mt-md-0">
+                            <button class="qty-btn decrease-btn" data-variant="<%= item.variantId._id %>" data-size="<%= item.size %>">-</button>
+                            <span class="qty-value"><%= item.quantity %></span>
+                            <button class="qty-btn increase-btn" data-variant="<%= item.variantId._id %>" data-size="<%= item.size %>">+</button>
+                        </div>
+
+                        <!-- Remove Button Column -->
+                        <div class="col-md-2 col-6 text-end text-md-center mt-2 mt-md-0">
+                            <button class="btn btn-danger remove-btn" data-variant="<%= item.variantId._id %>" data-size="<%= item.size %>">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+
+        <!-- RIGHT SIDE: Order Summary Sidebar (Takes up 4 columns out of 12) -->
+        <div class="col-lg-4 mt-4 mt-lg-0">
+            <div class="card shadow-sm sticky-top" style="top: 20px; z-index: 10;">
+                <div class="card-body">
+                    <h4 class="mb-3">Order Summary</h4>
+                    <hr>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Total Products</span>
+                        <strong id="totalProducts"><%= cartItems.length %></strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Total Quantity</span>
+                        <strong id="totalQuantity"><%= totalQuantity %></strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Cart Total</span>
+                        <strong id="cartTotal" class="text-success fs-5">₹<%= total %></strong>
+                    </div>
+
+                    <hr>
+
+                    <button 
+                        type="button" 
+                        class="btn btn-dark w-100 py-2 fw-bold" 
+                        onclick="validateCheckout()" 
+                        <%= cartItems.length === 0 ? "disabled" : "" %>>
+                        Proceed to Checkout
+                    </button>
+
+                    <div id="checkoutError" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- <div class="row">
+
+    <div class="col-lg-4 ms-auto">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <h4>Cart Summary</h4>
+
+                <hr>
+
+                <div class="d-flex justify-content-between">
+
+                    <span>Total</span>
+
+                    <strong id="cartTotal">
+                        ₹<%= total %>
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div> -->
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+
+
+
+document.querySelectorAll(".increase-btn")
+
+.forEach(button=>{
+
+    button.addEventListener("click",async()=>{
+
+        const variantId=button.dataset.variant;
+
+        const size=button.dataset.size;
+
+        const res=await fetch("/user/cart/update",{
+
+            method:"POST",
+
+            headers:{
+
+                "Content-Type":"application/json"
+
+            },
+
+            body:JSON.stringify({
+
+                variantId,
+
+                size,
+
+                action:"inc"
+
+            })
+
+        });
+
+        const data=await res.json();
+
+        if(data.success){
+
+const card = button.closest(".cart-card");
+
+card.querySelector(".qty-value").textContent = data.quantity;
+card.querySelector(".subtotal").textContent = data.subtotal;
+
+document.getElementById("totalProducts").textContent =
+    data.totalProducts;
+
+document.getElementById("totalQuantity").textContent =
+    data.totalQuantity;
+document.getElementById("cartTotal").textContent =
+"₹" + data.total;
+        }else{
+                Swal.fire({
+                    icon:"error",
+                    title:data.message
+                })
+            // alert(data.message);
+
+        }
+
+    });
+
+});
+
+
+
+document.querySelectorAll(".decrease-btn")
+
+.forEach(button=>{
+
+    button.addEventListener("click",async()=>{
+
+        const variantId=button.dataset.variant;
+
+        const size=button.dataset.size;
+
+        const res=await fetch("/user/cart/update",{
+
+            method:"POST",
+
+            headers:{
+
+                "Content-Type":"application/json"
+
+            },
+
+            body:JSON.stringify({
+
+                variantId,
+
+                size,
+
+                action:"dec"
+
+            })
+
+        });
+
+        const data=await res.json();
+
+        if(data.success){
+
+    const card = button.closest(".cart-card");
+
+card.querySelector(".qty-value").textContent = data.quantity;
+card.querySelector(".subtotal").textContent = data.subtotal;
+
+document.getElementById("totalProducts").textContent =
+    data.totalProducts;
+
+document.getElementById("totalQuantity").textContent =
+    data.totalQuantity;
+document.getElementById("cartTotal").textContent ="₹" + data.total;
+
+        }else{
+                return Swal.fire({
+                    icon:"error",
+                    title:data.message
+                })            
+            // alert(data.message);
+
+        }
+
+    });
+
+});
+
+
+
+document.querySelectorAll(".remove-btn")
+
+.forEach(button=>{
+
+    button.addEventListener("click",async()=>{
+        console.log("Remove button clicked");
+        const variantId=button.dataset.variant;
+
+        const size=button.dataset.size;
+
+        const res=await fetch("/user/cart/remove",{
+
+            method:"POST",
+
+            headers:{
+
+                "Content-Type":"application/json"
+
+            },
+
+            body:JSON.stringify({
+
+                variantId,
+
+                size
+
+            })
+
+        });
+
+        const data=await res.json();
+
+        if(data.success){
+
+button.closest(".cart-card").remove();
+
+document.getElementById("cartTotal").textContent ="₹" + data.total;
+document.getElementById("totalProducts").textContent =data.totalProducts;
+
+document.getElementById("totalQuantity").textContent =data.totalQuantity;
+document.getElementById("totalQuantity").textContent =data.totalQuantity;
+
+document.getElementById("totalProducts").textContent =data.totalProducts;
+
+
+        }else{
+                Swal.fire({
+                    icon:"error",
+                    title:data.message
+                })
+            // alert(data.message);
+
+        }
+
+    });
+
+});
+
+
+
+async function validateCheckout() {
+
+    const checkoutError =
+        document.getElementById("checkoutError");
+
+    checkoutError.innerHTML = "";
+
+    try {
+
+        const response = await fetch("/user/validate-checkout", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+
+        const data = await response.json();
+
+
+        console.log("Validate checkout response:", data);
+
+
+        // --------------------------------
+        // EVERYTHING IS VALID
+        // --------------------------------
+
+        if (data.success) {
+            console.log("validator executed redirecting to /checkout")
+            window.location.href = "/user/checkout";
+
+            return;
+        }
+
+
+        let html = `
+            <div class="alert alert-danger">
+
+                <strong>
+                    ${data.message}
+                </strong>
+        `;
+
+
+        // --------------------------------
+        // UNAVAILABLE PRODUCTS
+        // --------------------------------
+
+        if (
+            data.unavailableProducts &&
+            data.unavailableProducts.length > 0
+        ) {
+
+            html += `
+                <div class="mt-3">
+
+                    <strong>
+                        Unavailable products:
+                    </strong>
+
+                    <ul class="mb-2">
+            `;
+
+
+            data.unavailableProducts.forEach(product => {
+
+                html += `
+                    <li>
+                        <strong>
+                            ${product.name}
+                        </strong>
+                        - ${product.reason}
+                    </li>
+                `;
+
+            });
+
+
+            html += `
+                    </ul>
+
+                </div>
+            `;
+        }
+
+
+        // --------------------------------
+        // OUT OF STOCK / INSUFFICIENT STOCK
+        // --------------------------------
+
+        if (
+            data.outOfStockProducts &&
+            data.outOfStockProducts.length > 0
+        ) {
+
+            html += `
+                <div class="mt-3">
+
+                    <strong>
+                        Products with insufficient stock:
+                    </strong>
+
+                    <ul class="mb-2">
+            `;
+
+
+            data.outOfStockProducts.forEach(product => {
+
+                html += `
+                    <li>
+
+                        <strong>
+                            ${product.name}
+                        </strong>
+
+                        - Size ${product.size}
+
+                        - Requested:
+                        ${product.requestedQuantity}
+
+                        - Available:
+                        ${product.availableStock}
+
+                    </li>
+                `;
+
+            });
+
+
+            html += `
+                    </ul>
+
+                </div>
+            `;
+        }
+
+
+        html += `
+
+                <div class="mt-2">
+                    Please remove or update these products
+                    and proceed with the remaining products.
+                </div>
+
+            </div>
+        `;
+
+
+        checkoutError.innerHTML = html;
+
+
+    } catch (error) {
+
+        console.error(
+            "Validate checkout error:",
+            error
+        );
+
+
+        checkoutError.innerHTML = `
+            <div class="alert alert-danger">
+                Something went wrong.
+                Please try again.
+            </div>
+        `;
+    }
+}
+
+
+</script>
+
+</body>
+
+</html>

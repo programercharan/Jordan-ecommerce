@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>My Wishlist</title>
+
+<link
+href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+rel="stylesheet">
+
+<link
+rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+
+body{
+    background:#f5f5f5;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+/* ================= NAVBAR ================= */
+
+.navbar-brand{
+    font-weight:700;
+    letter-spacing:1px;
+}
+
+.navbar{
+    margin-bottom:30px;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar{
+
+    background:white;
+    border-radius:10px;
+    padding:20px;
+    box-shadow:0 0 10px rgba(0,0,0,.08);
+
+}
+
+.sidebar h5{
+
+    margin-bottom:20px;
+    font-weight:600;
+
+}
+
+.sidebar a{
+
+    display:block;
+    text-decoration:none;
+    color:#333;
+    padding:12px 15px;
+    border-radius:8px;
+    margin-bottom:8px;
+    transition:.3s;
+
+}
+
+.sidebar a:hover{
+
+    background:#212529;
+    color:white;
+
+}
+
+.sidebar a.active{
+
+    background:#212529;
+    color:white;
+
+}
+
+/* ================= MAIN CONTENT ================= */
+
+.main-content{
+
+    background:white;
+    border-radius:10px;
+    padding:25px;
+    box-shadow:0 0 10px rgba(0,0,0,.08);
+
+}
+
+.page-title{
+
+    font-weight:700;
+    margin-bottom:25px;
+
+}
+
+/* ================= SEARCH ================= */
+
+.search-bar{
+
+    display:flex;
+    gap:10px;
+    margin-bottom:30px;
+
+}
+
+.search-bar input{
+
+    flex:1;
+
+}
+
+/* ================= PRODUCT CARD ================= */
+
+.product-card{
+    display:flex;
+    align-items:center;
+    background:white;
+    border-radius:10px;
+    border:1px solid #ddd;
+    overflow:hidden;
+}
+
+.product-card:hover{
+
+    transform:translateY(-4px);
+    box-shadow:0 8px 20px rgba(0,0,0,.12);
+
+}
+
+.product-image{
+    width:220px;
+    height:220px;
+    object-fit:cover;
+    flex-shrink:0;
+}
+
+.product-body{
+    padding:20px;
+    flex:1;
+}
+
+.product-name{
+
+    font-weight:600;
+    color:#222;
+    text-decoration:none;
+
+}
+
+.product-name:hover{
+
+    color:black;
+
+}
+
+.sale-price{
+
+    font-size:20px;
+    font-weight:bold;
+    color:#198754;
+
+}
+
+.regular-price{
+
+    text-decoration:line-through;
+    color:#888;
+    margin-left:8px;
+
+}
+
+.info{
+
+    margin-top:8px;
+    margin-bottom:6px;
+    font-size:15px;
+
+}
+
+.action-buttons{
+
+    display:flex;
+    gap:10px;
+    margin-top:15px;
+
+}
+
+.action-buttons button{
+
+    flex:1;
+
+}
+
+.status{
+
+    margin-top:10px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+
+<div class="container">
+
+<a class="navbar-brand fw-bold" href="/user/home">
+
+JORDAN
+
+</a>
+
+<button
+class="navbar-toggler"
+type="button"
+data-bs-toggle="collapse"
+data-bs-target="#navbarNav">
+
+<span class="navbar-toggler-icon"></span>
+
+</button>
+
+<div
+class="collapse navbar-collapse"
+id="navbarNav">
+
+<ul class="navbar-nav ms-auto">
+
+<li class="nav-item">
+
+<a class="nav-link" href="/user/home">
+
+Home
+
+</a>
+
+</li>
+
+
+<li class="nav-item">
+
+<a
+class="nav-link position-relative"
+href="/user/wishlist">
+
+<i class="bi bi-heart-fill text-danger fs-5"></i>
+
+</a>
+
+</li>
+
+<li class="nav-item">
+
+
+<li class="nav-item">
+    <a class="nav-link position-relative" href="/user/cart">
+        <i class="bi bi-cart3 fs-5"></i>
+        
+        <% if (locals.cartCount && cartCount > 0) { %>
+            <span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+            >
+                <%= cartCount %>
+            </span>
+        <% } %>
+    </a>
+</li>
+
+<li class="nav-item">
+
+<a
+class="nav-link"
+href="/user/profile">
+
+Profile
+
+</a>
+
+</li>
+
+</ul>
+
+</div>
+
+</div>
+
+</nav>
+
+<!-- ================= PAGE ================= -->
+
+<div class="container mb-5">
+
+<div class="row">
+
+<!-- ================= SIDEBAR ================= -->
+
+<div class="col-lg-3 mb-4">
+
+<div class="sidebar">
+
+<h5>My Account</h5>
+
+<a
+href="/user/profile"
+class="<%= currentPage==='profile'?'active':'' %>">
+
+Profile
+
+</a>
+
+<a
+href="/user/address"
+class="<%= currentPage==='address'?'active':'' %>">
+
+Address
+
+</a>
+
+<a
+href="/user/wishlist"
+class="<%= currentPage==='wishlist'?'active':'' %>">
+
+Wishlist
+
+</a>
+
+<a
+href="/user/orders"
+class="<%= currentPage==='orders'?'active':'' %>">
+
+Orders
+
+</a>
+
+<a
+href="/user/wallet"
+class="<%= currentPage==='wallet'?'active':'' %>">
+
+My Wallet
+
+</a>
+
+<a
+href="/user/logout"
+class="text-danger fw-bold">
+
+Logout
+
+</a>
+
+</div>
+
+</div>
+
+<!-- ================= MAIN CONTENT ================= -->
+
+<div class="col-lg-9">
+
+<div class="main-content">
+
+<h2 class="page-title">
+
+My Wishlist
+
+</h2>
+
+<!-- SEARCH -->
+
+<div class="search-bar">
+
+<input
+type="text"
+id="searchInput"
+class="form-control"
+placeholder="Search wishlist...">
+
+<button
+class="btn btn-dark"
+id="searchBtn">
+
+Search
+
+</button>
+
+<button
+class="btn btn-outline-secondary"
+id="clearBtn">
+
+Clear
+
+</button>
+
+</div>
+
+<!-- PRODUCT GRID START -->
+
+<div class="row">
+
+    <% if(productsOfWishlist.length===0){ %>
+
+<div class="col-12">
+
+    <div class="text-center py-5">
+
+        <i class="bi bi-heart fs-1 text-danger"></i>
+
+        <h3 class="mt-3">
+            Your Wishlist is Empty
+        </h3>
+
+        <p class="text-muted">
+            Save your favourite shoes here.
+        </p>
+
+        <a href="/user/shop"
+           class="btn btn-dark mt-2">
+            Continue Shopping
+        </a>
+
+    </div>
+
+</div>
+
+<% } else { %>
+
+<% productsOfWishlist.forEach(eachProduct=>{ %>
+
+<%
+let sizeObj = eachProduct.variantId.sizeAndStock.find(
+    element => element.size === Number(eachProduct.size)
+);
+%>
+
+<div class="product-card d-flex">
+
+    <a href="/user/product/<%= eachProduct.productId._id %>/<%= eachProduct.variantId._id %>">
+
+        <img
+            src="<%= eachProduct.variantId.images[0] %>"
+            class="product-image">
+
+    </a>
+
+    <div class="product-body flex-grow-1">
+
+        <a
+            href="/user/product/<%= eachProduct.productId._id %>/<%= eachProduct.variantId._id %>"
+            class="product-name">
+
+            <%= eachProduct.productId.name %>
+
+        </a>
+
+        <div class="mt-2">
+
+            <span class="sale-price">
+                ₹<%= eachProduct.variantId.salePrice %>
+            </span>
+
+            <span class="regular-price">
+                ₹<%= eachProduct.variantId.regularPrice %>
+            </span>
+
+        </div>
+
+        <div class="info">
+            <strong>Color :</strong>
+            <%= eachProduct.variantId.color %>
+        </div>
+
+        <div class="info">
+            <strong>Size :</strong>
+            <%= eachProduct.size %>
+        </div>
+
+        <div class="status">
+
+            <% if(!eachProduct.productId.list || !eachProduct.variantId.list){ %>
+
+                <span class="badge bg-danger">
+                    Unavailable
+                </span>
+
+            <% } else if(!sizeObj || sizeObj.stock<=0){ %>
+
+                <span class="badge bg-warning text-dark">
+                    Out of Stock
+                </span>
+
+            <% } else { %>
+
+                <span class="badge bg-success">
+                    In Stock
+                </span>
+
+            <% } %>
+
+        </div>
+        <a
+    href="/user/product/<%= eachProduct.productId._id %>/<%= eachProduct.variantId._id %>"
+    class="btn btn-outline-dark w-100 mt-3">
+
+    <i class="bi bi-eye"></i>
+    View Product
+
+</a>
+
+        <div class="action-buttons">
+
+            <button
+                class="btn btn-dark addToCartBtn"
+                data-variantid="<%= eachProduct.variantId._id %>"
+                data-size="<%= eachProduct.size %>">
+
+                <i class="bi bi-cart-plus"></i>
+                Add to Cart
+
+            </button>
+
+            <button
+                class="btn btn-outline-danger removeWishlistBtn"
+                data-variantid="<%= eachProduct.variantId._id %>"
+                data-size="<%= eachProduct.size %>">
+
+                <i class="bi bi-trash"></i>
+                Remove
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<% }) %>
+
+<% } %>
+
+</div>
+
+<!-- Pagination -->
+
+<% if(totalPages>1){ %>
+
+<nav class="mt-4">
+
+<ul class="pagination justify-content-center">
+
+<% for(let i=1;i<=totalPages;i++){ %>
+
+<li class="page-item <%= currentPage===i?'active':'' %>">
+
+<a
+class="page-link"
+href="?page=<%= i %>">
+
+<%= i %>
+
+</a>
+
+</li>
+
+<% } %>
+
+</ul>
+
+</nav>
+
+<% } %>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+
+</html>
+
+<script>
+    const removeBtns = document.querySelectorAll(".removeWishlistBtn");
+
+removeBtns.forEach((btn) => {
+
+    btn.addEventListener("click", async (e) => {
+
+        try {
+
+            console.log("inside remove button");
+
+            btn.disabled = true;
+
+            console.log("btn.dataset ->", btn.dataset);
+
+            const res = await fetch("/user/wishlist/addAndRemove", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    variantId: btn.dataset.variantid,
+                    size: btn.dataset.size,
+                    action: "remove"
+                })
+            });
+
+
+            const data = await res.json();
+
+            console.log("data ->", data);
+
+
+            if (data.success) {
+
+                btn.disabled = false;
+
+                Swal.fire({
+                icon: 'info',
+                title: 'Removed From Wishlist'
+                }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/user/wishlist';
+                }
+                });
+
+            } else {
+
+                btn.disabled = false;
+
+                Swal.fire({
+                    title: data.error,
+                    icon: "error"
+                });
+
+            }
+
+
+        } catch (error) {
+
+            console.log("remove wishlist error ->", error);
+
+            btn.disabled = false;
+
+            Swal.fire({
+                title: "Something went wrong",
+                icon: "error"
+            });
+
+        }
+
+    });
+
+});
+
+
+const addToCartBtns = document.querySelectorAll(".addToCartBtn");
+
+addToCartBtns.forEach((btn) => {
+
+    btn.addEventListener("click", async () => {
+
+        console.log("Add to cart event triggered");
+
+        try {
+
+            btn.disabled = true;
+
+            console.log("btn.dataset ->", btn.dataset);
+
+            const res = await fetch("/user/cart/add", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    variantId: btn.dataset.variantid,
+                    size: btn.dataset.size,
+                    quantity: 1
+                })
+            });
+
+
+            const data = await res.json();
+
+            console.log("data ->", data);
+
+
+            if (data.success) {
+
+                btn.disabled = false;
+                Swal.fire({
+                icon: 'info',
+                title: 'Added to cart'
+                }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/user/wishlist';
+                }
+                });
+
+
+
+            } else {
+                console.log("elsre executed",data.message)
+                if(data.message){
+
+                    btn.disabled = false;
+                   return  Swal.fire({
+                    icon: 'info',
+                    title: data.message
+                    }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/user/wishlist';
+                    }
+                    })
+
+                }
+
+                btn.disabled = false;
+
+                Swal.fire({
+                    title: "User Haven't Logged In",
+                    text: "Would You Like To Login",
+                    icon: "info",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, Login",
+                    cancelButtonText: "Later"
+
+                }).then((result) => {
+
+                    if (result.isConfirmed) {
+                        window.location.href = "/user/login";
+                    }
+
+                });
+
+            }
+
+
+        } catch (error) {
+
+            console.log("Add to cart error ->", error);
+
+            btn.disabled = false;
+
+            Swal.fire({
+                title: "Something went wrong",
+                icon: "error"
+            });
+
+        }
+
+    });
+
+});
+</script>

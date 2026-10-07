@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Create Offer</title>
+
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+
+    <!-- Bootstrap Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+
+    <style>
+
+        /* ==========================================
+           SIDEBAR
+        ========================================== */
+
+        .sidebar {
+
+            background-color: #ffffff;
+
+            min-height: 100vh;
+
+            padding: 25px 18px;
+
+            border-right: 1px solid #e5e7eb;
+
+            position: sticky;
+
+            top: 0;
+
+        }
+
+
+        .sidebar-title {
+
+            font-size: 21px;
+
+            font-weight: 700;
+
+            margin-bottom: 30px;
+
+            padding-left: 10px;
+
+        }
+
+
+        .sidebar-section {
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            color: #8a8f98;
+
+            text-transform: uppercase;
+
+            margin-top: 20px;
+
+            margin-bottom: 8px;
+
+            padding-left: 10px;
+
+        }
+
+
+        .sidebar a {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            text-decoration: none;
+
+            color: #555b65;
+
+            padding: 11px 12px;
+
+            margin-bottom: 4px;
+
+            border-radius: 8px;
+
+            font-size: 14px;
+
+            transition: 0.2s;
+
+        }
+
+
+        .sidebar a:hover {
+
+            background-color: #f1f3f5;
+
+            color: #212529;
+
+        }
+
+
+        .sidebar a.active {
+
+            background-color: #212529;
+
+            color: #ffffff;
+
+        }
+
+
+        .sidebar hr {
+
+            border: 0;
+
+            border-top: 1px solid #eeeeee;
+
+            margin: 20px 0;
+
+        }
+
+
+        /* ==========================================
+           OFFER CARD
+        ========================================== */
+
+        .offer-card {
+
+            max-width: 650px;
+
+            width: 100%;
+
+        }
+
+
+        /* ==========================================
+           ERROR MESSAGE
+        ========================================== */
+
+        .error-message {
+
+            color: #dc3545;
+
+            font-size: 13px;
+
+            display: block;
+
+            margin-top: 4px;
+
+        }
+
+
+        /* ==========================================
+           CHECKBOX CONTAINER
+        ========================================== */
+
+        .checkbox-container {
+
+            border: 1px solid #dee2e6;
+
+            border-radius: 6px;
+
+            padding: 15px;
+
+            max-height: 250px;
+
+            overflow-y: auto;
+
+        }
+
+
+        @media (max-width: 767px) {
+
+            .sidebar {
+
+                min-height: auto;
+
+                position: relative;
+
+                border-right: none;
+
+                border-bottom: 1px solid #e5e7eb;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container-fluid">
+
+    <div class="row">
+
+
+        <!-- ================================================= -->
+        <!-- SIDEBAR -->
+        <!-- ================================================= -->
+
+        <div class="col-md-3 col-lg-2 p-0">
+
+            <div class="sidebar">
+
+
+                <!-- SIDEBAR TITLE -->
+
+                <div class="sidebar-title">
+
+                    Admin Panel
+
+                </div>
+
+
+                <!-- ==========================================
+                     MANAGEMENT
+                =========================================== -->
+
+                <div class="sidebar-section">
+
+                    Management
+
+                </div>
+
+
+                <!-- DASHBOARD -->
+
+                <a
+                    href="/admin/dashboard"
+                    class="<%= currentSideBar === 'dashboard' ? 'active' : '' %>"
+                >
+
+                    <i class="bi bi-speedometer2"></i>
+
+                    Dashboard
+
+                </a>
+
+
+                <!-- USERS -->
+
+                <a
+                    href="/admin/userManagement"
+                    class="<%= currentSideBar === 'users' ? 'active' : '' %>"
+                >
+
+                    <i class="bi bi-people"></i>
+
+                    Users
+
+                </a>
+
+
+                <hr>
+
+
+                <!-- ==========================================
+                     CATALOG MANAGEMENT
+                =========================================== -->
+
+                <div class="sidebar-section">
+
+                    Catalog Management
+
+                </div>
+
+
+                <!-- CATEGORIES -->
+
+                <a
+                    href="/admin/category/categories"
+                    class="<%= currentSideBar === 'categories' ? 'active' : '' %>"
+                >
+
+                    <i class="bi bi-tags"></i>
+
+                    Categories
+
+                </a>
+
+
+                <!-- PRODUCTS -->
+
+                <a
+                    href="/admin/product/products"
+                    class="<%= currentSideBar === 'product' ? 'active' : '' %>"
+                >
+
+                    <i class="bi bi-box-seam"></i>
+
+                    Products
+
+                </a>
+
+
+                <hr>
+
+
+                <!-- ==========================================
+                     ORDER MANAGEMENT
+                =========================================== -->
+
+                <div class="sidebar-section">
+
+                    Order Management
+
+                </div>
+
+
+                <!-- ORDERS -->
+
+                <a
+                    href="/admin/orders"
+                    class="<%= currentSideBar === 'orders' ? 'active' : '' %>"
+                >
+
+                    <i class="bi bi-cart-check"></i>
+
+                    Orders
+
+                </a>
+
+
+                <!-- COUPONS -->
+
+                <a
+                    href="/admin/coupons"
+                    class="<%= currentSideBar === 'coupons' ? 'active' : '' %>"
+                >
+
+                    <i class="bi bi-ticket-perforated"></i>
+
+                    Coupons
+
+                </a>
+
+
+                <!-- OFFERS -->
+
+                <a
+                    href="/admin/offers/list"
+                    class="<%= currentSideBar === 'offers' ? 'active' : '' %>"
+                >
+
+                    <i class="bi bi-percent"></i>
+
+                    Offers
+
+                </a>
+
+
+                <hr>
+
+
+                <!-- ==========================================
+                     REPORTS
+                =========================================== -->
+
+                <div class="sidebar-section">
+
+                    Reports
+
+                </div>
+
+
+                <!-- SALES REPORT -->
+
+                <a
+                    href="/admin/sales-report"
+                    class="<%= currentSideBar === 'salesReport' ? 'active' : '' %>"
+                >
+
+                    <i class="bi bi-bar-chart-line"></i>
+
+                    Sales Report
+
+                </a>
+
+
+                <hr>
+
+
+                <!-- LOGOUT -->
+
+                <a
+                    href="/admin/logout"
+                    class="text-danger fw-bold"
+                >
+
+                    <i class="bi bi-box-arrow-right"></i>
+
+                    Logout
+
+                </a>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- MAIN CONTENT -->
+        <!-- ================================================= -->
+
+        <div class="col-lg-10 min-vh-100 p-4">
+
+
+            <!-- PAGE HEADER -->
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <div>
+
+                    <h3 class="fw-bold mb-1">
+
+                        Create Offer
+
+                    </h3>
+
+                    <p class="text-muted mb-0">
+
+                        Create a product or category offer.
+
+                    </p>
+
+                </div>
+
+
+                <a
+                    href="/admin/offers/list"
+                    class="btn btn-outline-dark"
+                >
+
+                    <i class="bi bi-arrow-left me-1"></i>
+
+                    Back to Offers
+
+                </a>
+
+            </div>
+
+
+
+            <!-- ================================================= -->
+            <!-- SERVER ERROR -->
+            <!-- ================================================= -->
+
+            <% if (typeof error !== "undefined" && error) { %>
+
+                <div
+                    class="alert alert-danger alert-dismissible fade show"
+                    role="alert"
+                >
+
+                    <i class="bi bi-exclamation-circle me-2"></i>
+
+                    <%= error %>
+
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                    ></button>
+
+                </div>
+
+            <% } %>
+
+
+
+            <!-- ================================================= -->
+            <!-- OFFER FORM -->
+            <!-- ================================================= -->
+
+            <div class="card border-0 shadow-sm offer-card">
+
+                <div class="card-body p-4">
+
+
+                    <form
+                        id="offerForm"
+                        action="/admin/offers/create"
+                        method="POST"
+                        novalidate
+                    >
+
+
+                        <!-- ===================================== -->
+                        <!-- OFFER NAME -->
+                        <!-- ===================================== -->
+
+                        <div class="mb-3">
+
+                            <label
+                                for="offerName"
+                                class="form-label fw-semibold"
+                            >
+
+                                Offer Name
+
+                            </label>
+
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="offerName"
+                                name="offerName"
+                                placeholder="Enter offer name"
+                                value="<%= typeof offerName !== 'undefined' ? offerName : '' %>"
+                            >
+
+
+                            <small
+                                id="offerNameError"
+                                class="error-message"
+                            ></small>
+
+                        </div>
+
+
+
+                        <!-- ===================================== -->
+                        <!-- OFFER TYPE -->
+                        <!-- ===================================== -->
+
+                        <div class="mb-3">
+
+                            <label
+                                for="offerType"
+                                class="form-label fw-semibold"
+                            >
+
+                                Offer Type
+
+                            </label>
+
+
+                            <select
+                                class="form-select"
+                                id="offerType"
+                                name="offerType"
+                            >
+
+                                <option value="">
+
+                                    Select offer type
+
+                                </option>
+
+
+                                <option
+                                    value="product"
+                                    <%= typeof offerType !== "undefined" &&
+                                        offerType === "product"
+                                        ? "selected"
+                                        : "" %>
+                                >
+
+                                    Product Offer
+
+                                </option>
+
+
+                                <option
+                                    value="category"
+                                    <%= typeof offerType !== "undefined" &&
+                                        offerType === "category"
+                                        ? "selected"
+                                        : "" %>
+                                >
+
+                                    Category Offer
+
+                                </option>
+
+                            </select>
+
+
+                            <small
+                                id="offerTypeError"
+                                class="error-message"
+                            ></small>
+
+                        </div>
+
+
+
+                        <!-- ===================================== -->
+                        <!-- PRODUCTS -->
+                        <!-- ===================================== -->
+
+                        <div
+                            class="mb-3"
+                            id="productContainer"
+                        >
+
+                            <label class="form-label fw-semibold">
+
+                                Select Products
+
+                            </label>
+
+
+                            <div class="checkbox-container">
+
+
+                                <% if (typeof products !== "undefined" &&
+                                       products &&
+                                       products.length > 0) { %>
+
+
+                                    <% products.forEach(product => { %>
+
+
+                                        <div class="form-check mb-2">
+
+
+                                            <input
+                                                class="form-check-input product-checkbox"
+                                                type="checkbox"
+                                                id="product_<%= product._id %>"
+                                                name="productIds[]"
+                                                value="<%= product._id %>"
+
+                                                <%
+                                                const selectedProducts =
+                                                    typeof productIds !== "undefined" &&
+                                                    Array.isArray(productIds)
+                                                        ? productIds
+                                                        : [];
+                                                %>
+
+                                                <%= selectedProducts.some(
+                                                    id =>
+                                                        String(id) ===
+                                                        String(product._id)
+                                                )
+                                                    ? "checked"
+                                                    : ""
+                                                %>
+                                            >
+
+
+                                            <label
+                                                class="form-check-label"
+                                                for="product_<%= product._id %>"
+                                            >
+
+                                                <%= product.name %>
+
+                                            </label>
+
+
+                                        </div>
+
+
+                                    <% }) %>
+
+
+                                <% } else { %>
+
+
+                                    <p class="text-muted mb-0">
+
+                                        No products available
+
+                                    </p>
+
+
+                                <% } %>
+
+
+                            </div>
+
+
+                            <small
+                                id="productError"
+                                class="error-message"
+                            ></small>
+
+                        </div>
+
+
+
+                        <!-- ===================================== -->
+                        <!-- CATEGORIES -->
+                        <!-- ===================================== -->
+
+                        <div
+                            class="mb-3"
+                            id="categoryContainer"
+                        >
+
+                            <label class="form-label fw-semibold">
+
+                                Select Categories
+
+                            </label>
+
+
+                            <div class="checkbox-container">
+
+
+                                <% if (typeof categories !== "undefined" &&
+                                       categories &&
+                                       categories.length > 0) { %>
+
+
+                                    <% categories.forEach(category => { %>
+
+
+                                        <div class="form-check mb-2">
+
+
+                                            <input
+                                                class="form-check-input category-checkbox"
+                                                type="checkbox"
+                                                id="category_<%= category._id %>"
+                                                name="categoryIds[]"
+                                                value="<%= category._id %>"
+
+                                                <%
+                                                const selectedCategories =
+                                                    typeof categoryIds !== "undefined" &&
+                                                    Array.isArray(categoryIds)
+                                                        ? categoryIds
+                                                        : [];
+                                                %>
+
+                                                <%= selectedCategories.some(
+                                                    id =>
+                                                        String(id) ===
+                                                        String(category._id)
+                                                )
+                                                    ? "checked"
+                                                    : ""
+                                                %>
+                                            >
+
+
+                                            <label
+                                                class="form-check-label"
+                                                for="category_<%= category._id %>"
+                                            >
+
+                                                <%= category.categoryName %>
+
+                                            </label>
+
+
+                                        </div>
+
+
+                                    <% }) %>
+
+
+                                <% } else { %>
+
+
+                                    <p class="text-muted mb-0">
+
+                                        No categories available
+
+                                    </p>
+
+
+                                <% } %>
+
+
+                            </div>
+
+
+                            <small
+                                id="categoryError"
+                                class="error-message"
+                            ></small>
+
+                        </div>
+
+
+
+                        <!-- ===================================== -->
+                        <!-- DISCOUNT -->
+                        <!-- ===================================== -->
+
+                        <div class="mb-3">
+
+                            <label
+                                for="discountPercentage"
+                                class="form-label fw-semibold"
+                            >
+
+                                Discount Percentage
+
+                            </label>
+
+
+                            <div class="input-group">
+
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="discountPercentage"
+                                    name="discountPercentage"
+                                    min="1"
+                                    max="100"
+                                    step="1"
+                                    placeholder="Enter percentage"
+                                    value="<%= typeof discountPercentage !== 'undefined'
+                                        ? discountPercentage
+                                        : '' %>"
+                                >
+
+
+                                <span class="input-group-text">
+
+                                    %
+
+                                </span>
+
+                            </div>
+
+
+                            <small class="text-muted">
+
+                                Discount must be between 1% and 100%.
+
+                            </small>
+
+
+                            <small
+                                id="discountError"
+                                class="error-message"
+                            ></small>
+
+                        </div>
+
+
+
+                        <!-- ===================================== -->
+                        <!-- STATUS -->
+                        <!-- ===================================== -->
+
+                        <div class="mb-4">
+
+                            <label
+                                for="isActive"
+                                class="form-label fw-semibold"
+                            >
+
+                                Offer Status
+
+                            </label>
+
+
+                            <select
+                                class="form-select"
+                                id="isActive"
+                                name="isActive"
+                            >
+
+                                <option value="">
+
+                                    Select offer status
+
+                                </option>
+
+
+                                <option
+                                    value="true"
+                                    <%= typeof isActive !== "undefined" &&
+                                        String(isActive) === "true"
+                                        ? "selected"
+                                        : "" %>
+                                >
+
+                                    Active
+
+                                </option>
+
+
+                                <option
+                                    value="false"
+                                    <%= typeof isActive !== "undefined" &&
+                                        String(isActive) === "false"
+                                        ? "selected"
+                                        : "" %>
+                                >
+
+                                    Inactive
+
+                                </option>
+
+                            </select>
+
+
+                            <small
+                                id="isActiveError"
+                                class="error-message"
+                            ></small>
+
+                        </div>
+
+
+
+                        <!-- ===================================== -->
+                        <!-- END DATE -->
+                        <!-- ===================================== -->
+
+                        <div class="mb-4">
+
+                            <label
+                                for="endDate"
+                                class="form-label fw-semibold"
+                            >
+
+                                Offer End Date
+
+                            </label>
+
+
+                            <input
+                                type="date"
+                                class="form-control"
+                                id="endDate"
+                                name="endDate"
+                                value="<%= typeof endDate !== 'undefined'
+                                    ? endDate
+                                    : '' %>"
+                            >
+
+
+                            <small
+                                id="endDateError"
+                                class="error-message"
+                            ></small>
+
+                        </div>
+
+
+
+                        <!-- ===================================== -->
+                        <!-- BUTTONS -->
+                        <!-- ===================================== -->
+
+                        <div class="d-flex gap-2">
+
+
+                            <button
+                                type="submit"
+                                class="btn btn-dark px-4"
+                                id="createOfferBtn"
+                            >
+
+                                <i class="bi bi-plus-circle me-1"></i>
+
+                                Create Offer
+
+                            </button>
+
+
+                            <a
+                                href="/admin/offers/list"
+                                class="btn btn-secondary px-4"
+                            >
+
+                                Cancel
+
+                            </a>
+
+
+                        </div>
+
+
+                    </form>
+
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ========================================================= -->
+<!-- JAVASCRIPT -->
+<!-- ========================================================= -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+
+    // =====================================================
+    // ELEMENTS
+    // =====================================================
+
+    const offerForm =
+        document.getElementById("offerForm");
+
+
+    const offerName =
+        document.getElementById("offerName");
+
+
+    const offerType =
+        document.getElementById("offerType");
+
+
+    const discountPercentage =
+        document.getElementById("discountPercentage");
+
+
+    const isActive =
+        document.getElementById("isActive");
+
+
+    const endDate =
+        document.getElementById("endDate");
+
+
+    const productContainer =
+        document.getElementById("productContainer");
+
+
+    const categoryContainer =
+        document.getElementById("categoryContainer");
+
+
+
+    // =====================================================
+    // SHOW / HIDE PRODUCT AND CATEGORY
+    // =====================================================
+
+    function updateOfferTypeFields() {
+
+
+        productContainer.style.display = "none";
+
+        categoryContainer.style.display = "none";
+
+
+        if (offerType.value === "product") {
+
+            productContainer.style.display = "block";
+
+        }
+
+
+        if (offerType.value === "category") {
+
+            categoryContainer.style.display = "block";
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // RUN WHEN PAGE LOADS
+    // =====================================================
+
+    updateOfferTypeFields();
+
+
+
+    // =====================================================
+    // OFFER TYPE CHANGE
+    // =====================================================
+
+    offerType.addEventListener(
+        "change",
+        function () {
+
+
+            updateOfferTypeFields();
+
+
+            clearError("offerTypeError");
+
+            clearError("productError");
+
+            clearError("categoryError");
+
+
+        }
+    );
+
+
+
+    // =====================================================
+    // SET MINIMUM DATE
+    // =====================================================
+
+    function setMinimumDate() {
+
+
+        const today =
+            new Date();
+
+
+        const year =
+            today.getFullYear();
+
+
+        const month =
+            String(
+                today.getMonth() + 1
+            ).padStart(2, "0");
+
+
+        const day =
+            String(
+                today.getDate()
+            ).padStart(2, "0");
+
+
+        const todayString =
+            `${year}-${month}-${day}`;
+
+
+        endDate.min =
+            todayString;
+
+    }
+
+
+    setMinimumDate();
+
+
+
+    // =====================================================
+    // CLEAR ALL ERRORS
+    // =====================================================
+
+    function clearErrors() {
+
+
+        document
+            .querySelectorAll(".error-message")
+            .forEach(error => {
+
+                error.innerText = "";
+
+            });
+
+    }
+
+
+
+    // =====================================================
+    // CLEAR ONE ERROR
+    // =====================================================
+
+    function clearError(elementId) {
+
+
+        const errorElement =
+            document.getElementById(elementId);
+
+
+        if (errorElement) {
+
+            errorElement.innerText = "";
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // SHOW ERROR
+    // =====================================================
+
+    function showError(
+        elementId,
+        message
+    ) {
+
+
+        const errorElement =
+            document.getElementById(elementId);
+
+
+        if (errorElement) {
+
+            errorElement.innerText =
+                message;
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // VALIDATION
+    // =====================================================
+
+    function validateForm() {
+
+
+        clearErrors();
+
+
+        let isValid =
+            true;
+
+
+
+        // =================================================
+        // OFFER NAME
+        // =================================================
+
+        const name =
+            offerName.value.trim();
+
+
+        if (name === "") {
+
+
+            showError(
+                "offerNameError",
+                "Offer name is required."
+            );
+
+
+            isValid =
+                false;
+
+        }
+
+
+
+        // =================================================
+        // OFFER TYPE
+        // =================================================
+
+        if (offerType.value === "") {
+
+
+            showError(
+                "offerTypeError",
+                "Please select an offer type."
+            );
+
+
+            isValid =
+                false;
+
+        }
+
+
+
+        // =================================================
+        // PRODUCT OFFER
+        // =================================================
+
+        if (
+            offerType.value === "product"
+        ) {
+
+
+            const selectedProducts =
+                document.querySelectorAll(
+                    ".product-checkbox:checked"
+                );
+
+
+            if (
+                selectedProducts.length === 0
+            ) {
+
+
+                showError(
+                    "productError",
+                    "Please select at least one product."
+                );
+
+
+                isValid =
+                    false;
+
+            }
+
+        }
+
+
+
+        // =================================================
+        // CATEGORY OFFER
+        // =================================================
+
+        if (
+            offerType.value === "category"
+        ) {
+
+
+            const selectedCategories =
+                document.querySelectorAll(
+                    ".category-checkbox:checked"
+                );
+
+
+            if (
+                selectedCategories.length === 0
+            ) {
+
+
+                showError(
+                    "categoryError",
+                    "Please select at least one category."
+                );
+
+
+                isValid =
+                    false;
+
+            }
+
+        }
+
+
+
+        // =================================================
+        // DISCOUNT
+        // =================================================
+
+        const discount =
+            Number(
+                discountPercentage.value
+            );
+
+
+        if (
+            discountPercentage.value.trim() === ""
+        ) {
+
+
+            showError(
+                "discountError",
+                "Discount percentage is required."
+            );
+
+
+            isValid =
+                false;
+
+        }
+
+
+        else if (
+            !Number.isFinite(discount)
+        ) {
+
+
+            showError(
+                "discountError",
+                "Please enter a valid discount percentage."
+            );
+
+
+            isValid =
+                false;
+
+        }
+
+
+        else if (
+            discount < 1 ||
+            discount > 100
+        ) {
+
+
+            showError(
+                "discountError",
+                "Discount percentage must be between 1% and 100%."
+            );
+
+
+            isValid =
+                false;
+
+        }
+
+
+
+        // =================================================
+        // OFFER STATUS
+        // =================================================
+
+        if (
+            isActive.value === ""
+        ) {
+
+
+            showError(
+                "isActiveError",
+                "Please select offer status."
+            );
+
+
+            isValid =
+                false;
+
+        }
+
+
+
+        // =================================================
+        // END DATE
+        // =================================================
+
+        if (
+            endDate.value === ""
+        ) {
+
+
+            showError(
+                "endDateError",
+                "End date is required."
+            );
+
+
+            isValid =
+                false;
+
+        }
+
+
+        else {
+
+
+            const selectedDate =
+                new Date(
+                    endDate.value
+                );
+
+
+            if (
+                isNaN(
+                    selectedDate.getTime()
+                )
+            ) {
+
+
+                showError(
+                    "endDateError",
+                    "Please enter a valid date."
+                );
+
+
+                isValid =
+                    false;
+
+            }
+
+
+            else {
+
+
+                const today =
+                    new Date();
+
+
+                today.setHours(
+                    0,
+                    0,
+                    0,
+                    0
+                );
+
+
+                selectedDate.setHours(
+                    0,
+                    0,
+                    0,
+                    0
+                );
+
+
+                if (
+                    selectedDate <= today
+                ) {
+
+
+                    showError(
+                        "endDateError",
+                        "End date must be a future date."
+                    );
+
+
+                    isValid =
+                        false;
+
+                }
+
+            }
+
+        }
+
+
+
+        return isValid;
+
+    }
+
+
+
+    // =====================================================
+    // FORM SUBMIT
+    // =====================================================
+
+    offerForm.addEventListener(
+        "submit",
+        function (event) {
+
+
+            event.preventDefault();
+
+
+            // ---------------------------------------------
+            // FRONTEND VALIDATION
+            // ---------------------------------------------
+
+            if (
+                !validateForm()
+            ) {
+
+                return;
+
+            }
+
+
+            // ---------------------------------------------
+            // FORM IS VALID
+            // ---------------------------------------------
+
+            offerForm.submit();
+
+        }
+    );
+
+
+
+    // =====================================================
+    // OFFER NAME ERROR CLEAR
+    // =====================================================
+
+    offerName.addEventListener(
+        "input",
+        function () {
+
+
+            if (
+                offerName.value.trim() !== ""
+            ) {
+
+
+                clearError(
+                    "offerNameError"
+                );
+
+            }
+
+        }
+    );
+
+
+
+    // =====================================================
+    // DISCOUNT ERROR CLEAR
+    // =====================================================
+
+    discountPercentage.addEventListener(
+        "input",
+        function () {
+
+
+            const discount =
+                Number(
+                    discountPercentage.value
+                );
+
+
+            if (
+                discount >= 1 &&
+                discount <= 100
+            ) {
+
+
+                clearError(
+                    "discountError"
+                );
+
+            }
+
+        }
+    );
+
+
+
+    // =====================================================
+    // STATUS ERROR CLEAR
+    // =====================================================
+
+    isActive.addEventListener(
+        "change",
+        function () {
+
+
+            if (
+                isActive.value !== ""
+            ) {
+
+
+                clearError(
+                    "isActiveError"
+                );
+
+            }
+
+        }
+    );
+
+
+
+    // =====================================================
+    // PRODUCT CHECKBOX ERROR CLEAR
+    // =====================================================
+
+    document
+        .querySelectorAll(".product-checkbox")
+        .forEach(
+            checkbox => {
+
+
+                checkbox.addEventListener(
+                    "change",
+                    function () {
+
+
+                        const selectedProducts =
+                            document.querySelectorAll(
+                                ".product-checkbox:checked"
+                            );
+
+
+                        if (
+                            selectedProducts.length > 0
+                        ) {
+
+
+                            clearError(
+                                "productError"
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+
+    // =====================================================
+    // CATEGORY CHECKBOX ERROR CLEAR
+    // =====================================================
+
+    document
+        .querySelectorAll(".category-checkbox")
+        .forEach(
+            checkbox => {
+
+
+                checkbox.addEventListener(
+                    "change",
+                    function () {
+
+
+                        const selectedCategories =
+                            document.querySelectorAll(
+                                ".category-checkbox:checked"
+                            );
+
+
+                        if (
+                            selectedCategories.length > 0
+                        ) {
+
+
+                            clearError(
+                                "categoryError"
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+
+    // =====================================================
+    // END DATE ERROR CLEAR
+    // =====================================================
+
+    endDate.addEventListener(
+        "change",
+        function () {
+
+
+            if (
+                endDate.value !== ""
+            ) {
+
+
+                clearError(
+                    "endDateError"
+                );
+
+            }
+
+        }
+    );
+
+
+</script>
+
+<script>
+const alertData = <%- JSON.stringify(alert || null) %>;
+
+console.log(alertData)
+
+if (alertData) {
+
+    Swal.fire({
+
+        icon: alertData.type,
+
+        title: alertData.message,
+
+        confirmButtonText: "OK"
+
+    });
+
+    
+}
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Add Category</title>
+
+
+    <!-- Bootstrap -->
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+
+    <!-- Bootstrap Icons -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+
+    <style>
+
+        body {
+            background-color: #f5f6f8;
+
+            margin: 0;
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Arial,
+                sans-serif;
+        }
+
+
+        /* ==============================
+           SIDEBAR
+        ============================== */
+
+        .sidebar {
+
+            background-color: #ffffff;
+
+            min-height: 100vh;
+
+            padding: 25px 18px;
+
+            border-right: 1px solid #e5e7eb;
+
+            position: sticky;
+
+            top: 0;
+        }
+
+
+        .sidebar-title {
+
+            font-size: 21px;
+
+            font-weight: 700;
+
+            margin-bottom: 30px;
+
+            padding-left: 10px;
+        }
+
+
+        .sidebar-section {
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            color: #8a8f98;
+
+            text-transform: uppercase;
+
+            margin-top: 20px;
+
+            margin-bottom: 8px;
+
+            padding-left: 10px;
+        }
+
+
+        .sidebar a {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            text-decoration: none;
+
+            color: #555b65;
+
+            padding: 11px 12px;
+
+            margin-bottom: 4px;
+
+            border-radius: 8px;
+
+            font-size: 14px;
+
+            transition: 0.2s;
+        }
+
+
+        .sidebar a:hover {
+
+            background-color: #f1f3f5;
+
+            color: #212529;
+        }
+
+
+        .sidebar a.active {
+
+            background-color: #212529;
+
+            color: #ffffff;
+        }
+
+
+        .sidebar hr {
+
+            border: 0;
+
+            border-top: 1px solid #eeeeee;
+
+            margin: 20px 0;
+        }
+
+
+        /* ==============================
+           MAIN CONTENT
+        ============================== */
+
+        .main-content {
+
+            padding: 30px;
+        }
+
+
+        /* ==============================
+           CATEGORY CARD
+        ============================== */
+
+        .category-card {
+
+            border: none;
+
+            border-radius: 15px;
+
+        }
+
+
+        .category-card .card-header {
+
+            border-radius: 15px 15px 0 0;
+
+            padding: 18px 22px;
+
+        }
+
+
+        /* ==============================
+           MOBILE
+        ============================== */
+
+        @media (max-width: 767px) {
+
+            .sidebar {
+
+                min-height: auto;
+
+                position: relative;
+
+                border-right: none;
+
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+
+            .main-content {
+
+                padding: 20px 15px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container-fluid">
+
+    <div class="row">
+
+
+        <!-- ==========================================
+             SIDEBAR
+        =========================================== -->
+
+        <div class="col-md-3 col-lg-2 p-0">
+
+            <div class="sidebar">
+
+
+                <div class="sidebar-title">
+
+                    Admin Panel
+
+                </div>
+
+
+                <!-- MANAGEMENT -->
+
+                <div class="sidebar-section">
+
+                    Management
+
+                </div>
+
+
+                <a
+                    href="/admin/userManagement"
+                    class="<%= currentSideBar === 'users' ? 'active' : '' %>">
+
+                    <i class="bi bi-people"></i>
+
+                    Users
+
+                </a>
+
+
+                <hr>
+
+
+                <!-- CATALOG -->
+
+                <div class="sidebar-section">
+
+                    Catalog Management
+
+                </div>
+
+
+                <a
+                    href="/admin/category/categories"
+                    class="<%= currentSideBar === 'categories' ? 'active' : '' %>">
+
+                    <i class="bi bi-tags"></i>
+
+                    Categories
+
+                </a>
+
+
+                <a
+                    href="/admin/product/products"
+                    class="<%= currentSideBar === 'products' ? 'active' : '' %>">
+
+                    <i class="bi bi-box-seam"></i>
+
+                    Products
+
+                </a>
+
+
+                <!--
+                <a
+                    href="/admin/variant/variants"
+                    class="<%= currentSideBar === 'variants' ? 'active' : '' %>">
+
+                    <i class="bi bi-grid"></i>
+
+                    Variants
+
+                </a>
+                -->
+
+
+                <hr>
+
+
+                <!-- ORDERS -->
+
+                <div class="sidebar-section">
+
+                    Order Management
+
+                </div>
+
+
+                <a
+                    href="/admin/orders"
+                    class="<%= currentSideBar === 'orders' ? 'active' : '' %>">
+
+                    <i class="bi bi-cart-check"></i>
+
+                    Orders
+
+                </a>
+
+
+                <a
+                    href="/admin/coupons"
+                    class="<%= currentSideBar === 'coupons' ? 'active' : '' %>">
+
+                    <i class="bi bi-ticket-perforated"></i>
+
+                    Coupons
+
+                </a>
+
+
+                <a
+                    href="/admin/offers/list"
+                    class="<%= currentSideBar === 'offers' ? 'active' : '' %>">
+
+                    <i class="bi bi-percent"></i>
+
+                    Offers
+
+                </a>
+
+
+                <hr>
+
+
+                <!-- REPORTS -->
+
+                <div class="sidebar-section">
+
+                    Reports
+
+                </div>
+
+
+                <a
+                    href="/admin/sales-report"
+                    class="<%= currentSideBar === 'salesReport' ? 'active' : '' %>">
+
+                    <i class="bi bi-bar-chart-line"></i>
+
+                    Sales Report
+
+                </a>
+
+
+                <hr>
+
+
+                <!-- LOGOUT -->
+
+                <a
+                    href="/admin/logout"
+                    class="text-danger fw-bold">
+
+                    <i class="bi bi-box-arrow-right"></i>
+
+                    Logout
+
+                </a>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ==========================================
+             MAIN CONTENT
+        =========================================== -->
+
+        <div class="col-md-9 col-lg-10 main-content">
+
+
+            <div class="card shadow-sm category-card">
+
+
+                <div class="card-header bg-dark text-white">
+
+                    <h4 class="mb-0">
+
+                        Add Category
+
+                    </h4>
+
+                </div>
+
+
+                <div class="card-body p-4">
+
+
+                    <form
+                        id="add-category"
+                        action="/admin/category/addCategory"
+                        method="post">
+
+
+                        <p
+                            class="text-danger"
+                            id="credentialError">
+                        </p>
+
+
+
+                        <!-- CATEGORY NAME -->
+
+                        <div class="mb-3">
+
+                            <label
+                                class="form-label fw-semibold">
+
+                                Category Name
+
+                            </label>
+
+
+                            <input
+                                type="text"
+                                id="categoryName"
+                                name="categoryName"
+                                class="form-control"
+                                placeholder="Enter Category Name">
+
+
+                            <small
+                                class="text-danger"
+                                id="categoryNameError">
+                            </small>
+
+                        </div>
+
+
+
+                        <!-- DESCRIPTION -->
+
+                        <div class="mb-3">
+
+                            <label
+                                class="form-label fw-semibold">
+
+                                Description
+
+                            </label>
+
+
+                            <textarea
+                                id="description"
+                                name="description"
+                                class="form-control"
+                                rows="4"
+                                placeholder="Enter Description"></textarea>
+
+
+                            <small
+                                class="text-danger"
+                                id="descriptionError">
+                            </small>
+
+                        </div>
+
+
+
+                        <!-- STATUS -->
+
+                        <div class="mb-3">
+
+                            <label
+                                class="form-label fw-semibold">
+
+                                Status
+
+                            </label>
+
+
+                            <select
+                                id="list"
+                                name="list"
+                                class="form-select">
+
+
+                                <option value="">
+
+                                    Select Status
+
+                                </option>
+
+
+                                <option value="true">
+
+                                    Listed
+
+                                </option>
+
+
+                                <option value="false">
+
+                                    Unlisted
+
+                                </option>
+
+
+                            </select>
+
+
+                            <small
+                                class="text-danger"
+                                id="listError">
+                            </small>
+
+                        </div>
+
+
+
+                        <!-- BUTTON -->
+
+                        <div class="d-flex justify-content-end mt-4">
+
+
+                            <button
+                                type="submit"
+                                class="btn btn-dark px-4">
+
+                                Add Category
+
+                            </button>
+
+
+                        </div>
+
+
+                    </form>
+
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+</body>
+
+</html>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+    const form=document.getElementById("add-category")
+
+    form.addEventListener("submit",(e)=>{
+
+        e.preventDefault()
+
+        let hasError=false
+
+        const categoryName=document.getElementById("categoryName").value.trim()
+        const description=document.getElementById("description").value.trim()
+        const list=document.getElementById("list").value
+
+        const categoryNameError=document.getElementById("categoryNameError")
+        const descriptionError=document.getElementById("descriptionError")
+        const listError=document.getElementById("listError")
+        const credentialError=document.getElementById("credentialError")
+
+        categoryNameError.innerText=""
+        descriptionError.innerText=""
+        listError.innerText=""
+        credentialError.innerText=""
+
+
+        if(categoryName==="" && description==="" && list===""){
+            credentialError.innerText="All Fields Are Required"
+            hasError=true
+        }
+
+        if(categoryName===""){
+            categoryNameError.innerText="Enter Category Name"
+            hasError=true
+        }
+
+        if(description===""){
+            descriptionError.innerText="Enter Description"
+            hasError=true
+        }
+
+        if(list===""){
+            listError.innerText="Select Status"
+            hasError=true
+        }
+
+
+        if(!hasError){
+            form.submit()
+        }
+
+    })
+
+
+    // CATEGORY NAME
+
+    document.getElementById("categoryName").addEventListener("input",()=>{
+
+        const categoryName =
+        document.getElementById("categoryName").value.trim()
+
+        if(categoryName!==""){
+
+            document.getElementById("categoryNameError").innerText=""
+
+            document.getElementById("credentialError").innerText=""
+
+        }
+
+    })
+
+
+    // DESCRIPTION
+
+    document.getElementById("description").addEventListener("input",()=>{
+
+        const description =
+        document.getElementById("description").value.trim()
+
+        if(description!==""){
+
+            document.getElementById("descriptionError").innerText=""
+
+            document.getElementById("credentialError").innerText=""
+
+        }
+
+    })
+
+
+    // LIST / STATUS
+
+    document.getElementById("list").addEventListener("change",()=>{
+
+        const list =
+        document.getElementById("list").value
+
+        if(list!==""){
+
+            document.getElementById("listError").innerText=""
+
+            document.getElementById("credentialError").innerText=""
+
+        }
+
+    })
+
+</script>
+
+</body>
+</html>
+

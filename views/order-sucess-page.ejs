@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+   content="width=device-width, initial-scale=1">
+
+<title>Order Success</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet">
+
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+</head>
+
+<body class="bg-light">
+
+<!-- ========================================= -->
+
+<!-- NAVBAR -->
+
+<!-- ========================================= -->
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+
+```
+<div class="container">
+
+    <a class="navbar-brand fw-bold"
+       href="/">
+
+        JORDAN
+
+    </a>
+
+
+    <button
+        class="navbar-toggler"
+        data-bs-toggle="collapse"
+        data-bs-target="#navMenu">
+
+        <span class="navbar-toggler-icon"></span>
+
+    </button>
+
+
+    <div class="collapse navbar-collapse"
+         id="navMenu">
+
+        <ul class="navbar-nav ms-auto align-items-center">
+
+            <li class="nav-item me-3">
+
+                <a class="nav-link"
+                   href="/user/wishlist">
+
+                    <i class="bi bi-heart fs-5"></i>
+
+                </a>
+
+            </li>
+
+
+            <li class="nav-item me-3">
+
+                <a class="nav-link"
+                   href="/user/cart">
+
+                    <i class="bi bi-cart3 fs-5"></i>
+
+                </a>
+
+            </li>
+
+
+            <li class="nav-item">
+
+                <a class="nav-link"
+                   href="/user/profile">
+
+                    Profile
+
+                </a>
+
+            </li>
+
+        </ul>
+
+    </div>
+
+</div>
+```
+
+</nav>
+
+<!-- ========================================= -->
+
+<!-- MAIN -->
+
+<!-- ========================================= -->
+
+<div class="container py-5">
+
+```
+<div class="row justify-content-center">
+
+    <div class="col-lg-9">
+
+        <div class="card shadow border-0 rounded-4">
+
+            <div class="card-body p-5">
+
+
+                <!-- ========================================= -->
+                <!-- SUCCESS -->
+                <!-- ========================================= -->
+
+                <div class="text-center">
+
+                    <i class="bi bi-check-circle-fill text-success"
+                       style="font-size:90px;">
+                    </i>
+
+
+                    <h2 class="fw-bold mt-3">
+
+                        Order Placed Successfully!
+
+                    </h2>
+
+
+                    <p class="text-muted">
+
+                        Thank you for your purchase.
+
+                        Your order has been confirmed
+                        and is now being processed.
+
+                    </p>
+
+
+                    <h5 class="mt-4">
+
+                        Order ID
+
+                    </h5>
+
+
+                    <h3 class="fw-bold text-dark">
+
+                        <%= order.orderId %>
+
+                    </h3>
+
+                </div>
+
+
+
+                <hr class="my-5">
+
+
+
+                <!-- ========================================= -->
+                <!-- PRODUCTS -->
+                <!-- ========================================= -->
+
+                <h4 class="fw-bold mb-4">
+
+                    Order Details
+
+                </h4>
+
+
+                <% order.orderItems.forEach(item => { %>
+
+
+                    <div class="d-flex align-items-start mb-4">
+
+
+                        <!-- IMAGE -->
+
+                        <img
+                            src="<%= item.productImage %>"
+                            width="90"
+                            height="90"
+                            class="rounded me-3"
+                            style="object-fit:cover;">
+
+
+
+                        <!-- PRODUCT INFORMATION -->
+
+                        <div class="flex-grow-1">
+
+
+                            <h5 class="mb-1">
+
+                                <%= item.productName %>
+
+                            </h5>
+
+
+                            <p class="mb-1">
+
+                                Size :
+                                <strong>
+
+                                    <%= item.size %>
+
+                                </strong>
+
+                            </p>
+
+
+                            <p class="mb-2">
+
+                                Quantity :
+                                <strong>
+
+                                    <%= item.quantity %>
+
+                                </strong>
+
+                            </p>
+
+
+
+                            <!-- ORIGINAL PRICE -->
+
+                            <small class="text-muted">
+
+                                Regular Price :
+                                ₹<%= item.regularPrice %>
+
+                            </small>
+
+
+                            <br>
+
+
+
+                            <!-- OFFER -->
+
+                            <% if (item.offerApplied) { %>
+
+                                <small class="text-success">
+
+                                    Offer Discount :
+                                    <%= item.offerDiscountPercentage %>%
+
+                                    (-₹<%= item.offerDiscountAmount %>)
+
+                                </small>
+
+                                <br>
+
+                            <% } %>
+
+
+
+                            <!-- PRICE AFTER OFFER -->
+
+                            <small>
+
+                                Price after offer :
+                                ₹<%= item.salePrice %>
+
+                            </small>
+
+
+                            <br>
+
+
+
+                            <!-- ITEM SUBTOTAL -->
+
+                            <small>
+
+                                Item Subtotal :
+                                ₹<%= item.itemSubtotal %>
+
+                            </small>
+
+
+
+                            <!-- COUPON -->
+
+                            <% if (item.couponDiscount > 0) { %>
+
+                                <br>
+
+                                <small class="text-danger">
+
+                                    Coupon Discount :
+                                    -₹<%= item.couponDiscount %>
+
+                                </small>
+
+                            <% } %>
+
+
+
+                            <!-- FINAL PAID -->
+
+                            <br>
+
+                            <strong class="text-success">
+
+                                You Pay :
+                                ₹<%= item.paidAmount %>
+
+                            </strong>
+
+
+                        </div>
+
+
+
+                        <!-- ITEM TOTAL -->
+
+                        <div class="text-end ms-3">
+
+                            <h5 class="fw-bold">
+
+                                ₹<%= item.paidAmount %>
+
+                            </h5>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <hr>
+
+
+                <% }) %>
+
+
+
+
+                <!-- ========================================= -->
+                <!-- ORDER SUMMARY -->
+                <!-- ========================================= -->
+
+                <h4 class="fw-bold mb-4">
+
+                    Order Summary
+
+                </h4>
+
+
+                <div class="row justify-content-end">
+
+                    <div class="col-md-6">
+
+
+                        <!-- SUBTOTAL -->
+
+                        <div class="d-flex justify-content-between mb-2">
+
+                            <span>
+
+                                Subtotal
+
+                            </span>
+
+                            <strong>
+
+                                ₹<%= order.subtotal %>
+
+                            </strong>
+
+                        </div>
+
+
+
+                        <!-- SHIPPING -->
+
+                        <div class="d-flex justify-content-between mb-2">
+
+                            <span>
+
+                                Shipping
+
+                            </span>
+
+                            <strong>
+
+                                ₹50
+
+                            </strong>
+
+                        </div>
+
+
+
+                        <!-- COUPON -->
+
+                        <% if (
+                            order.couponDetails &&
+                            order.couponDetails.discountValue > 0
+                        ) { %>
+
+
+                            <div class="d-flex justify-content-between mb-2">
+
+                                <span>
+
+                                    Coupon
+
+                                    <% if (
+                                        order.couponDetails.discountType === "percentage"
+                                    ) { %>
+
+                                        (<%= order.couponDetails.discountValue %>%)
+
+                                    <% } else { %>
+
+                                        (₹<%= order.couponDetails.discountValue %>)
+
+                                    <% } %>
+
+                                </span>
+
+
+                                <strong class="text-danger">
+
+                                    -₹<%= order.orderItems.reduce(
+                                        (total, item) =>
+                                            total + (item.couponDiscount || 0),
+                                        0
+                                    ) %>
+
+                                </strong>
+
+                            </div>
+
+
+                        <% } else { %>
+
+
+                            <div class="d-flex justify-content-between mb-2">
+
+                                <span>
+
+                                    Coupon Discount
+
+                                </span>
+
+                                <strong>
+
+                                    ₹0
+
+                                </strong>
+
+                            </div>
+
+
+                        <% } %>
+
+
+
+                        <hr>
+
+
+
+                        <!-- GRAND TOTAL -->
+
+                        <div class="d-flex justify-content-between">
+
+                            <h5 class="fw-bold">
+
+                                Grand Total
+
+                            </h5>
+
+
+                            <h5 class="fw-bold">
+
+                                ₹<%= order.grandTotal %>
+
+                            </h5>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+
+
+                <hr class="my-5">
+
+
+
+                <!-- ========================================= -->
+                <!-- SHIPPING ADDRESS -->
+                <!-- ========================================= -->
+
+                <h4 class="fw-bold mb-3">
+
+                    Shipping Address
+
+                </h4>
+
+
+                <p class="mb-1">
+
+                    <strong>
+
+                        <%= order.shippingAddress.firstName %>
+                        <%= order.shippingAddress.lastName %>
+
+                    </strong>
+
+                </p>
+
+
+                <p class="mb-1">
+
+                    <%= order.shippingAddress.address %>
+
+                </p>
+
+
+                <p class="mb-1">
+
+                    <%= order.shippingAddress.city %>,
+                    <%= order.shippingAddress.state %>
+
+                </p>
+
+
+                <p class="mb-1">
+
+                    PIN :
+                    <%= order.shippingAddress.pincode %>
+
+                </p>
+
+
+                <p>
+
+                    Phone :
+                    <%= order.shippingAddress.phoneNumber %>
+
+                </p>
+
+
+
+
+                <hr>
+
+
+
+                <!-- ========================================= -->
+                <!-- PAYMENT -->
+                <!-- ========================================= -->
+
+                <h4 class="fw-bold mb-3">
+
+                    Payment Method
+
+                </h4>
+
+
+                <p class="mb-5">
+
+                    <%= order.paymentMethod %>
+
+                </p>
+
+
+
+
+                <!-- ========================================= -->
+                <!-- BUTTONS -->
+                <!-- ========================================= -->
+
+                <div class="row g-3">
+
+
+                    <div class="col-md-6">
+
+                        <a
+                            href="/user/orders/<%= order._id %>"
+                            class="btn btn-dark w-100 py-3">
+
+                            Track Order
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <a
+                            href="/user/shop"
+                            class="btn btn-outline-dark w-100 py-3">
+
+                            Continue Shopping
+
+                        </a>
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+
+</body>
+
+</html>

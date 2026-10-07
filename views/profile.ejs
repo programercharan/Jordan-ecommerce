@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Profile</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+
+  <style>
+    body {
+      background-color: #f5f5f5;
+    }
+
+    .sidebar {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .sidebar h5 {
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 10px;
+      color: #333;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-bottom: 5px;
+    }
+
+    .sidebar a.active {
+    background-color: #0d6efd;
+    color: #fff;
+    font-weight: bold;
+}
+    .profile-card {
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+    }
+
+    .form-control {
+      margin-bottom: 10px;
+    }
+
+    .action-btn {
+      font-size: 14px;
+      margin-bottom: 0px;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+            <% if(error){ %>
+                <div class="alert alert-danger">
+                    <%= error %>
+                </div>
+            <%}%>
+            <!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+
+        <a class="navbar-brand fw-bold" href="/user/home">
+            JORDAN
+        </a>
+
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav">
+
+            <span class="navbar-toggler-icon"></span>
+
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+
+            <ul class="navbar-nav">
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/home">Home</a>
+                </li>
+ <li class="nav-item">
+
+    <a
+        class="nav-link position-relative"
+        href="/user/wishlist"
+    >
+
+        <i class="bi bi-heart fs-5"></i>
+
+        <% if (wishlistCount > 0) { %>
+
+            <span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+            >
+
+                <%= wishlistCount %>
+
+            </span>
+
+        <% } %>
+
+    </a>
+
+</li>
+<li class="nav-item">
+    <a class="nav-link position-relative" href="/user/cart">
+        <i class="bi bi-cart3 fs-5"></i>
+        
+        <% if (locals.cartCount && cartCount > 0) { %>
+            <span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+            >
+                <%= cartCount %>
+            </span>
+        <% } %>
+    </a>
+</li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/profile">Profile</a>
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+</nav>
+
+<div class="container mt-5">
+  <div class="row">
+
+    <!-- Sidebar -->
+    <div class="col-md-3">
+      <div class="sidebar">
+        <h5>My Account</h5>
+
+<a href="/user/profile" 
+   class="<%= currentPage === 'profile' ? 'active' : '' %>">
+   Profile
+</a>
+
+<a href="/user/address" 
+   class="<%= currentPage === 'address' ? 'active' : '' %>">
+   Address
+</a>
+
+<a href="/user/orders" 
+   class="<%= currentPage === 'orders' ? 'active' : '' %>">
+   Orders
+</a>
+
+<a href="/user/wishlist" 
+   class="<%= currentPage === 'wishlist' ? 'active' : '' %>">
+   Wishlist
+</a>
+
+<a href="/user/wallet" 
+   class="<%= currentPage === 'wallet' ? 'active' : '' %>">
+   My Wallet
+</a>
+
+ <a href="/user/logout" class="text-danger fw-bold">
+Logout
+ </a>
+
+      </div>
+    </div>
+
+<div class="col-md-9">
+  <div class="profile-card">
+
+    <h4 class="mb-4">Personal Information</h4>
+
+    <form action="/user/updateProfile" id="profileForm" method="post">
+
+      <div class="row">
+        <div class="col-md-6">
+          <label class="form-label">First Name</label>
+          <input type="text" id="firstName" name="firstName" class="form-control"
+            value="<%= user?.firstName %>">
+        </div>
+<small id="firstNameError" class="text-danger"></small>
+        <div class="col-md-6">
+          <label class="form-label">Last Name</label>
+          <input type="text" id="lastName" name="lastName" class="form-control"
+            value="<%= user?.lastName %>">
+        </div>
+      </div>
+<small id="lastNameError" class="text-danger"></small>
+      <!-- Email -->
+      <div class="mt-3">
+        <label class="form-label">Email</label>
+        <input type="email" id="email" name="email" class="form-control"
+          value="<%= user?.email %>" readonly>
+      </div>
+<small id="emailError" class="text-danger"></small>
+      <!-- Update Email Button -->
+      <div class="text-end  mt-1 mb-2">
+        <a href="/user/updateProfileEmail" class="btn btn-outline-primary action-btn">
+          Update Email
+        </a>
+      </div>
+
+      <!-- Phone -->
+      <div class="mt-1">
+        <label class="form-label">Phone Number</label>
+        <input type="text" id="phoneNumber" name="phoneNumber" class="form-control"
+          value="<%= user?.phoneNumber %>">
+      </div>
+<small id="phoneNumberError" class="text-danger"></small>
+      <!-- Password -->
+      <div class="mt-3">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control"
+          value="********" readonly>
+      </div>
+<!-- Referral Code -->
+
+
+
+      <!-- Update Password Button -->
+      <div class="text-end mt-2">
+        <a href="/user/updateProfilePassword" class="btn btn-outline-warning action-btn">
+          Update Password
+        </a>
+      </div>
+      <div class="mt-3">
+
+<label class="form-label"> Your Referral Code </label>
+
+<div class="input-group">
+
+<input
+  type="text"
+  class="form-control"
+  value="<%= user?.referralCode || '' %>"
+  readonly>
+
+<button
+  type="button"
+  class="btn btn-outline-primary"
+  id="copyReferralCode">
+
+  <i class="bi bi-copy"></i>
+  Copy
+
+</button>
+
+</div>
+
+<small class="text-muted"> Share this code with your friends and earn ₹500 cashback when they sign up using your code. </small>
+
+</div>
+
+<small id="credentialError" class="text-danger d-block mb-2"></small>
+      <!-- Save Changes -->
+      <button type="submit" class="btn btn-primary w-100 mt-4">
+        Save Changes
+      </button>
+
+    </form>
+
+  </div>
+</div>
+
+  </div>
+</div>
+<script>
+  const form = document.getElementById("profileForm");
+
+form.addEventListener("submit", (e) => {
+
+    e.preventDefault();
+
+    let hasError = false;
+
+    const nameRegex = /^[A-Za-z]+$/;
+    const phoneRegex = /^[0-9]{10}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    const firstName = document
+        .getElementById("firstName")
+        .value
+        .trim();
+
+    const lastName = document
+        .getElementById("lastName")
+        .value
+        .trim();
+
+    const phoneNumber = document
+        .getElementById("phoneNumber")
+        .value
+        .trim();
+
+    const email = document
+        .getElementById("email")
+        .value
+        .trim();
+
+
+    const firstNameError =
+        document.getElementById("firstNameError");
+
+    const lastNameError =
+        document.getElementById("lastNameError");
+
+    const phoneNumberError =
+        document.getElementById("phoneNumberError");
+
+    const emailError =
+        document.getElementById("emailError");
+
+    const credentialError =
+        document.getElementById("credentialError");
+
+
+    // Clear previous errors
+    firstNameError.innerText = "";
+    lastNameError.innerText = "";
+    phoneNumberError.innerText = "";
+    emailError.innerText = "";
+    credentialError.innerText = "";
+
+
+    console.log("First name:", firstName);
+    console.log(
+        "First-name regex result:",
+        nameRegex.test(firstName)
+    );
+
+
+    // First Name
+    if (firstName === "") {
+
+        firstNameError.innerText =
+            "Enter First Name";
+
+        hasError = true;
+
+    } else if (!nameRegex.test(firstName)) {
+
+        firstNameError.innerText =
+            "First Name must contain only alphabets";
+
+        hasError = true;
+    }
+
+
+    // Last Name
+    if (lastName === "") {
+
+        lastNameError.innerText =
+            "Enter Last Name";
+
+        hasError = true;
+
+    } else if (!nameRegex.test(lastName)) {
+
+        lastNameError.innerText =
+            "Last Name must contain only alphabets";
+
+        hasError = true;
+    }
+
+
+    // Phone Number
+    if (phoneNumber === "") {
+
+        phoneNumberError.innerText =
+            "Enter Phone Number";
+
+        hasError = true;
+
+    } else if (!phoneRegex.test(phoneNumber)) {
+
+        phoneNumberError.innerText =
+            "Enter a valid 10-digit Phone Number";
+
+        hasError = true;
+    }
+
+
+    // Email
+    if (email === "") {
+
+        emailError.innerText =
+            "Enter Email";
+
+        hasError = true;
+
+    } else if (!emailRegex.test(email)) {
+
+        emailError.innerText =
+            "Enter a valid Email";
+
+        hasError = true;
+    }
+
+
+    console.log("hasError:", hasError);
+
+
+    // Submit only when every validation passes
+    if (!hasError) {
+
+        form.submit();
+
+    }
+
+});
+</script>
+
+<script>
+
+const copyReferralCode =
+    document.getElementById("copyReferralCode");
+
+
+copyReferralCode.addEventListener("click", async () => {
+
+    const referralCode =
+        document.querySelector(
+            'input[readonly]'
+        ).value;
+
+
+    if (!referralCode) {
+
+        return;
+
+    }
+
+
+    try {
+
+        await navigator.clipboard.writeText(
+            referralCode
+        );
+
+
+        copyReferralCode.innerHTML =
+            '<i class="bi bi-check-lg"></i> Copied';
+
+
+        setTimeout(() => {
+
+            copyReferralCode.innerHTML =
+                '<i class="bi bi-copy"></i> Copy';
+
+        }, 2000);
+
+
+    } catch (error) {
+
+        console.error(
+            "Unable to copy referral code:",
+            error
+        );
+
+    }
+
+});
+
+</script>
+
+
+
+<script>
+
+
+const alertData = <%- JSON.stringify(alert || null) %>;
+
+console.log(alertData)
+if (alertData) {
+  Swal.fire({
+    icon: alertData.type,
+    title: alertData.message,
+    confirmButtonText: "OK"
+  }).then(()=>{
+    if(alertData.redirect){
+      window.location.href=alertData.redirect
+    }
+  })
+}
+
+</script>
+</body>
+</html>

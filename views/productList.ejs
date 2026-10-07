@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Collections</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+<style>
+
+body{
+    background:#f8f9fa;
+}
+
+/* Hero Section */
+.collection-header{
+    text-align:center;
+    padding:50px 0;
+}
+
+.collection-header h1{
+    font-size:3rem;
+    font-weight:700;
+}
+
+.collection-header p{
+    font-size:1.1rem;
+    color:#666;
+}
+
+/* Filter Sidebar */
+
+.filter-card{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.05);
+}
+
+.filter-title{
+    font-weight:600;
+    margin-bottom:10px;
+    margin-top:20px;
+}
+
+/* Product Cards */
+
+.product-card{
+    background:white;
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 0 10px rgba(0,0,0,0.08);
+    transition:0.3s;
+}
+
+.product-card:hover{
+    transform:translateY(-3px);
+}
+
+.product-image{
+    width:100%;
+    height:250px;
+    object-fit:cover;
+}
+
+.product-body{
+    padding:15px;
+}
+
+.product-name{
+    font-weight:600;
+}
+
+.product-price{
+    color:#198754;
+    font-weight:600;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+<div class="container">
+
+<a class="navbar-brand fw-bold" href="/user/home">
+    JORDAN
+</a>
+
+<button class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarContent">
+    <span class="navbar-toggler-icon"></span>
+</button>
+
+<div class="collapse navbar-collapse" id="navbarContent">
+
+    <!-- Search -->
+   <form class="d-flex align-items-center ms-auto me-4 gap-2" method="GET" action="/user/shop">
+
+    <input
+        type="search"
+        name="search"
+        id="searchInput"
+        class="form-control"
+        placeholder="Search shoes..."
+        style="max-width: 250px;"
+    >
+
+    <button
+        id="searchBtn"
+        class="btn btn-success"
+        type="submit"
+    >
+        Search
+    </button>
+
+    <button
+        id="clearBtn"
+        class="btn btn-secondary"
+        type="button"
+    >
+        Clear
+    </button>
+
+</form>
+
+    <ul class="navbar-nav">
+
+        <li class="nav-item"><a class="nav-link" href="/user/home">Home</a></li>
+
+<li class="nav-item">
+    <!-- 1. Added id="wishlist-nav" -->
+    <a class="nav-link position-relative" href="/user/wishlist" id="wishlist-nav">
+        <i class="bi bi-heart fs-5"></i>
+        
+        <!-- 2. Keep the span container always present, but hide it if count is 0 -->
+        <span 
+            id="wishlist-badge" 
+            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger <%= wishlistCount === 0 ? 'd-none' : '' %>"
+        >
+            <%= wishlistCount > 0 ? wishlistCount : '' %>
+        </span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link position-relative" href="/user/cart">
+        <i class="bi bi-cart3 fs-5"></i>
+        
+        <% if (locals.cartCount && cartCount > 0) { %>
+            <span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+            >
+                <%= cartCount %>
+            </span>
+        <% } %>
+    </a>
+</li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="/user/profile">Profile</a>
+        </li>
+
+    </ul>
+
+</div>
+
+</div>
+</nav>
+
+<!-- ================= PAGE HEADER ================= -->
+
+<div class="container">
+
+    <div class="collection-header">
+
+        <h1>All Collections</h1>
+
+        <p>
+            Discover your premium collection of all footwear
+        </p>
+
+    </div>
+
+</div>
+
+<!-- ================= MAIN CONTENT ================= -->
+<div class="container mb-5">
+<div class="row">
+
+    <!-- ================= FILTER SIDEBAR ================= -->
+    <div class="col-lg-3">
+
+        <div class="filter-card">
+
+            <h5 class="filter-title">Filters</h5>
+
+            <!-- CATEGORY -->
+            <!-- <%= JSON.stringify(categories) %> -->
+<div class="mb-3">
+
+    <label class="form-label fw-semibold">
+        Category
+    </label>
+
+    <% categories.forEach(cat => { %>
+
+        <div class="form-check">
+
+            <input
+                class="form-check-input  category-filter"
+                type="checkbox"
+                name="category"
+                value="<%= cat.categoryName %>"
+                id="category_<%= cat._id %>"
+            >
+
+            <label
+                class="form-check-label"
+                for="category_<%= cat._id %>"
+            >
+                <%= cat.categoryName %>
+            </label>
+
+        </div>
+
+    <% }) %>
+
+</div>
+
+            <!-- BRAND -->
+            <div class="mb-3">
+                <label class="form-label">Brand</label>
+                <select class="form-select filter" name="brand">
+                    <option value="">All</option>
+                    <option value="Nike">Nike</option>
+                    <option value="adidas">Adidas</option>
+                    <option value="Puma">Puma</option>
+                    <option value="Clarks">Clarks</option>
+                </select>
+            </div>
+
+            <!-- COLOR -->
+            <div class="mb-3">
+                <label class="form-label">Color</label>
+                <select class="form-select filter" name="color">
+                    <option value="">All</option>
+                    <option value="black">Black</option>
+                    <option value="white">White</option>
+                    <option value="red">red</option>
+                    <option value="brown">brown</option>
+                </select>
+            </div>
+
+
+
+<div class="mb-3">
+
+    <label class="form-label">
+        Price
+    </label>
+
+    <div class="d-flex justify-content-between mb-2">
+
+        <span>
+            ₹<span id="minPriceValue">0</span>
+        </span>
+
+        <span>
+            ₹<span id="maxPriceValue">10000</span>
+        </span>
+
+    </div>
+
+    <input
+        type="range"
+        class="form-range"
+        id="minPrice"
+        min="0"
+        max="10000"
+        step="100"
+        value="0"
+    >
+
+    <input
+        type="range"
+        class="form-range"
+        id="maxPrice"
+        min="0"
+        max="10000"
+        step="100"
+        value="10000"
+    >
+
+</div>
+
+            <button class="btn btn-dark w-100 mt-3" id="applyFilter">
+                Apply Filters
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- ================= PRODUCTS + SORT ================= -->
+    <div class="col-lg-9">
+
+        <!-- SORT BAR -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <h5 class="mb-0">Products</h5>
+
+            <select class="form-select w-auto" id="sortSelect">
+                <option value="">Sort By</option>
+                <option value="Newest First">Newest First</option>
+                <option value="Oldest First">Oldest First</option>
+                <option value="A-Z">A - Z</option>
+                <option value="Z-A">Z - A</option>
+                <option value="price_low">Price Low → High</option>
+                <option value="price_high">Price High → Low</option>
+            </select>
+
+        </div>
+
+        <!-- PRODUCTS GRID -->
+  
+<% if(sortAlphabeticOrder){%>
+<div class="row">
+
+            <% products.forEach((product,index)=>{ %>
+                <% for(let eachVariant of eachProductVariant){ %>
+                <% if(product._id.toString()===eachVariant.productId.toString()){ %>
+                    
+                    <div class="col-md-4 mb-4">
+
+                        <div class="product-card">
+
+                            <img src="<%= eachVariant.images[0] %>" class="product-image">
+
+                            <div class="product-body">
+
+                                <h6 class="product-name"><%= product.name %></h6>
+
+                                <div class="product-price">
+                                    ₹<%= eachVariant.salePrice %>
+                                </div>
+
+
+<%
+const productOffer = offersOfEachProduct.find(offer =>
+    offer.productId.some(id =>
+        id._id.toString() === product._id.toString()
+    )
+);
+%>
+
+<% if (productOffer) { %>
+
+    <div style="color: #ff8c00;">
+        <%= productOffer.offerPercentage %>% OFF
+    </div>
+
+<% } %>
+
+
+                             
+
+                                <% if(wishedProductIndexes.length) {%>
+                                <%wishedProductIndexes.forEach((eachIndex)=>{%>
+                                <% if(index===eachIndex){%>
+                                        
+
+                                    <button
+                                    class="btn btn-outline-dark d-flex align-items-center justify-content-center px-2 wishlistBtn" 
+                                    data-variantId="<%=eachVariant._id%>"
+                                    data-size="<%=eachVariant.sizeAndStock[0].size%>"
+                                    data-productId="<%=product._id%>">
+                                    Add to wishlist
+                                    <i class="bi bi-heart-fill ms-2 text-danger"></i>
+                                </button>
+                            <%}else{%>
+                                    <button
+                                    class="btn btn-outline-dark d-flex align-items-center justify-content-center px-2 wishlistBtn" 
+                                    data-variantId="<%=eachVariant._id%>"
+                                    data-productId="<%=product._id%>"
+                                    data-size="<%=eachVariant.sizeAndStock[0].size%>">
+                                    Add to wishlist
+                                    <i class="bi bi-heart ms-2"></i>
+                                </button>
+                            <%}%>
+                                <%})%>
+                                   <%}else{%>
+                                    <button
+                                    class="btn btn-outline-dark d-flex align-items-center justify-content-center px-2 wishlistBtn"
+                                    data-variantId="<%=eachVariant._id%>"
+                                    data-productId="<%=product._id%>"
+                                    data-size="<%=eachVariant.sizeAndStock[0].size%>">
+                                    Add to wishlist
+                                    <i class="bi bi-heart ms-2"></i>
+                                </button>
+                                <%}%>
+                                <a href="/user/product/<%= eachVariant._id %>"
+                                   class="btn btn-dark btn-sm w-100 mt-2">
+                                    View Product
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                <% } %>
+                <% } %>
+
+            <% }) %>
+
+
+        </div>
+
+
+
+<% }else{ %>
+
+        <div class="row">
+
+
+            <% eachProductVariant.forEach((v)=>{ %>
+                    <% products.forEach((product, index) => { %>
+                         <% if(v.productId.toString()===product._id.toString()){ %>
+                                
+                    <div class="col-md-4 mb-4">
+
+                        <div class="product-card">
+
+                            <img src="<%= v.images[0] %>" class="product-image">
+
+                            <div class="product-body">
+
+                                <h6 class="product-name"><%= product.name %></h6>
+
+                                <div class="product-price">
+                                    ₹<%= v.salePrice %>
+                                </div>
+
+
+                                
+<%
+const productOffer = offersOfEachProduct.find(offer =>
+    offer.productId.some(id =>
+        id._id.toString() === product._id.toString()
+    )
+);
+%>
+
+<% if (productOffer) { %>
+
+    <div style="color: #ff8c00;">
+        <%= productOffer.offerPercentage %>% OFF
+    </div>
+
+<% } %>
+
+
+
+                                <%
+const isWishlisted = wishedProductIndexes.includes(index);
+%>
+
+<% if (isWishlisted) { %>
+
+<button
+    class="btn btn-outline-dark d-flex align-items-center justify-content-center px-2 wishlistBtn"
+    data-variantId="<%= v._id %>"
+    data-productId="<%= product._id %>"
+    data-size="<%= v.sizeAndStock[0].size %>">
+    Add to wishlist
+    <i class="bi bi-heart-fill ms-2 text-danger"></i>
+</button>
+
+<% } else { %>
+
+<button
+    class="btn btn-outline-dark d-flex align-items-center justify-content-center px-2 wishlistBtn"
+    data-variantId="<%= v._id %>"
+    data-productId="<%= product._id %>"
+    data-size="<%= v.sizeAndStock[0].size %>">
+    Add to wishlist
+    <i class="bi bi-heart ms-2"></i>
+</button>
+
+<% } %>
+
+                                <a href="/user/product/<%=v._id%>"
+                                onclick="console.log('clicked product')"
+                                class="btn btn-dark btn-sm w-100 mt-2">
+                                    View Product
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+  
+                <% } %>
+
+            <% }) %>
+            <% }) %>
+
+        </div>
+<%}%>
+
+    </div>
+
+</div>
+</div>
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+
+        <% for(let i = 1; i <= totalPages; i++) { %>
+
+            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+
+                <button
+                    class="page-link page"
+                    data-page="<%= i %>"
+                    type="button">
+
+                    <%= i %>
+
+                </button>
+
+            </li>
+
+        <% } %>
+
+    </ul>
+</nav>
+<script>
+
+const searchInput =document.getElementById("searchInput")
+
+const searchBtn =document.getElementById("searchBtn")
+
+const clearBtn =document.getElementById("clearBtn")
+  pagination()
+
+searchBtn.addEventListener("click",()=>{
+
+    const searchValue =
+    searchInput.value.trim()
+
+    if(searchValue !== ""){
+
+        window.location.href =
+        `/user/shop?search=${encodeURIComponent(searchValue)}`
+
+    }else{
+
+        window.location.href =
+        "/user/shop"
+
+    }
+})
+
+clearBtn.addEventListener("click", () => {
+    // 1. Clear the visual input text box
+    searchInput.value = "";
+
+    // 2. Target the current URL
+    const url = new URL(window.location.href);
+
+    // 3. Remove only the search parameter
+    url.searchParams.delete("search");
+
+    // 4. Reload the page with the remaining active filters/sorting
+    window.location.href = url.toString();
+});
+
+const minPrice = document.getElementById("minPrice");
+const maxPrice = document.getElementById("maxPrice");
+
+const minPriceValue = document.getElementById("minPriceValue");
+const maxPriceValue = document.getElementById("maxPriceValue");
+
+
+// Minimum price slider
+minPrice.addEventListener("input", () => {
+
+    if (Number(minPrice.value) > Number(maxPrice.value)) {
+
+        minPrice.value = maxPrice.value;
+
+    }
+
+    minPriceValue.textContent = minPrice.value;
+
+});
+
+
+// Maximum price slider
+maxPrice.addEventListener("input", () => {
+
+    if (Number(maxPrice.value) < Number(minPrice.value)) {
+
+        maxPrice.value = minPrice.value;
+
+    }
+
+    maxPriceValue.textContent = maxPrice.value;
+
+});
+
+const filterElements = document.querySelectorAll(".filter");
+const applyBtn = document.getElementById("applyFilter");
+const sortSelect = document.getElementById("sortSelect");
+
+const url = new URL(window.location.href);
+
+const selectedCategories =
+    url.searchParams.get("category");
+
+if (selectedCategories) {
+
+    const categoriesFromUrl =
+        selectedCategories.split(",");
+
+    document
+        .querySelectorAll(".category-filter")
+        .forEach(checkbox => {
+
+            checkbox.checked =
+                categoriesFromUrl.includes(
+                    checkbox.value
+                );
+
+        });
+
+}
+
+
+sortSelect.addEventListener("change", () => {
+
+    const url = new URL(window.location.href);
+
+    if (sortSelect.value) {
+
+        url.searchParams.set("sort", sortSelect.value);
+
+    } else {
+
+        url.searchParams.delete("sort");
+
+    }
+
+    window.location.href = url;
+
+});
+
+let filterState = {};
+// -------------------- UPDATE STATE --------------------
+function updateState() {
+  filterElements.forEach(el => {
+    if (el.value) {
+      filterState[el.name] = el.value;
+    } else {
+      delete filterState[el.name];
+    }
+  });
+  
+      const selectedCategories =
+        Array.from(
+            document.querySelectorAll(".category-filter:checked")
+        ).map(checkbox => checkbox.value);
+
+
+    if (selectedCategories.length > 0) {
+
+        filterState.category = selectedCategories;
+
+    }
+
+    const min = Number(minPrice.value);
+const max = Number(maxPrice.value);
+
+if (min > 0 || max < 10000) {
+
+    filterState.minPrice = min;
+    filterState.maxPrice = max;
+
+} else {
+
+    delete filterState.minPrice;
+    delete filterState.maxPrice;
+
+}
+}
+
+
+
+// -------------------- BUILD URL --------------------
+function buildUrl() {
+  const url = new URL(window.location.href);
+
+  // clear old params
+  url.search = "";
+
+  Object.keys(filterState).forEach(key => {
+    url.searchParams.set(key, filterState[key]);
+  });
+
+  window.location.href = url;
+
+}
+
+
+function pagination(){
+   
+const pages=document.querySelectorAll(".page")
+console.log(pages)
+pages.forEach((btn)=>{
+    btn.addEventListener("click",()=>{
+        console.log("page button is clicked")
+        const pageNumber=btn.dataset.page
+         const url= new URL(window.location.href)
+         url.searchParams.set("page",pageNumber)
+         window.location.href=url
+    })
+})
+}
+
+// -------------------- APPLY BUTTON CLICK --------------------
+applyBtn.addEventListener("click", () => {
+     console.log("clicked");
+  updateState();
+  buildUrl();
+});
+
+
+
+// ========================================
+// RESTORE FILTERS FROM URL
+// ========================================
+
+const currentUrl = new URL(window.location.href);
+
+
+// -------- BRAND --------
+
+const selectedBrand = currentUrl.searchParams.get("brand");
+
+if (selectedBrand) {
+
+    const brandSelect = document.querySelector(
+        'select[name="brand"]'
+    );
+
+    brandSelect.value = selectedBrand;
+}
+
+
+// -------- COLOR --------
+
+const selectedColor = currentUrl.searchParams.get("color");
+
+if (selectedColor) {
+
+    const colorSelect = document.querySelector(
+        'select[name="color"]'
+    );
+
+    colorSelect.value = selectedColor;
+}
+
+
+// -------- MIN PRICE --------
+
+const selectedMinPrice =
+    currentUrl.searchParams.get("minPrice");
+
+if (selectedMinPrice) {
+
+    minPrice.value = selectedMinPrice;
+
+    minPriceValue.textContent = selectedMinPrice;
+}
+
+
+// -------- MAX PRICE --------
+
+const selectedMaxPrice =
+    currentUrl.searchParams.get("maxPrice");
+
+if (selectedMaxPrice) {
+
+    maxPrice.value = selectedMaxPrice;
+
+    maxPriceValue.textContent = selectedMaxPrice;
+}
+
+const wishlistBtn=document.querySelectorAll(".wishlistBtn")
+wishlistBtn.forEach((btn)=>{
+    btn.addEventListener("click",async()=>{
+        console.log("event listern activated")
+        try{
+            
+            const heartIcon=btn.querySelector("i")
+            if(heartIcon.classList.contains("bi-heart")){
+                console.log("inside the if block")
+                btn.disabled=true
+                console.log("btn.dataset.variantId->",btn.dataset.variantId)
+
+         const res=await fetch("/user/wishlist/addAndRemove",{
+
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({
+                variantId: btn.dataset.variantid,
+                size: btn.dataset.size,
+                action:"add",
+                fromListPage:true
+                })
+
+        }) 
+
+        const data=await res.json() 
+        console.log(data) 
+            if(data.success){
+            heartIcon.classList.toggle("bi-heart");
+            heartIcon.classList.toggle("bi-heart-fill");
+            heartIcon.classList.toggle("text-danger");
+            btn.disabled=false
+            
+            const badge = document.getElementById('wishlist-badge');
+            
+            // Update the count inside the badge
+            badge.textContent = data.newTotalCount;
+            
+            // Make sure the badge is visible (remove Bootstrap's 'd-none' utility class)
+            if (data.newTotalCount > 0) {
+                badge.classList.remove('d-none');
+            } else {
+                badge.classList.add('d-none');
+            }
+            Swal.fire({
+                title:"Product Added To Wishlist",
+                icon:"success"
+            })
+        }
+        else if(data.alert){
+            console.log("alert executed")
+            return Swal.fire({
+                icon:"error",
+                title:"User Haven't logged login",
+                confirmButtonText:"Yes,Login",
+            }).then((result)=>{
+                if(result.isConfirmed){
+                    window.location.href="/user/login"
+                }
+            })
+        }
+    }
+
+
+    else if(heartIcon.classList.contains("bi-heart-fill")){
+        console.log("inide the else ")
+        btn.disabled=true
+        console.log("btn.dataset.variantId->",btn.dataset)
+
+        const res=await fetch("/user/wishlist/addAndRemove",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({
+                variantId: btn.dataset.variantid,
+                size: btn.dataset.size,
+                action:"remove",
+                fromListPage:true
+            })
+        }) 
+        const data=await res.json()  
+        console.log("data->",data)
+        if(data.success){
+            console.log("inside the data.sucess")
+    heartIcon.classList.remove("bi-heart-fill");
+    heartIcon.classList.remove("text-danger");
+    heartIcon.classList.add("bi-heart");
+             btn.disabled=false
+    
+                         const badge = document.getElementById('wishlist-badge');
+            
+            // Update the count inside the badge
+            badge.textContent = data.newTotalCount;
+            
+            // Make sure the badge is visible (remove Bootstrap's 'd-none' utility class)
+            if (data.newTotalCount > 0) {
+                badge.classList.remove('d-none');
+            } else {
+                badge.classList.add('d-none');
+            }
+            Swal.fire({
+                title:"Product Added To Wishlist",
+                icon:"success"
+            })
+            return Swal.fire({
+                title:"Product Removed From Wishlist",
+                icon:"success"
+            })
+        }
+        else{
+             Swal.fire({
+                title:data.error,
+                icon:"error"
+            })
+        }
+
+    }
+
+        }catch(error){
+
+        }
+    })
+})
+
+
+const alertData =
+<%- JSON.stringify(alert || null) %>
+
+if(alertData){
+
+    Swal.fire({
+
+        icon: alertData.type,
+        title: alertData.message,
+        confirmButtonText:"OK"
+
+    })
+
+}
+</script>
+        

@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Add Coupon</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+ <style>
+.sidebar {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+    min-height: calc(100vh - 40px);
+}
+
+.sidebar a {
+    display: block;
+    padding: 10px 12px;
+    text-decoration: none;
+    color: #333;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    transition: 0.2s;
+}
+
+.sidebar a:hover {
+    background-color: #f1f1f1;
+    color: #111;
+}
+
+.sidebar a.active {
+    background-color: #111;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.sidebar hr {
+    margin: 20px 0;
+}
+
+.sidebar h6 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+
+.sidebar .logout {
+    color: #dc3545;
+    font-weight: 700;
+}
+
+.sidebar .logout:hover {
+    background-color: #fff0f0;
+    color: #dc3545;
+}
+
+.coupon-card {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+
+    /* Minimize form width */
+    max-width: 700px;
+}
+
+.error-message {
+    color: red;
+    font-size: 13px;
+}
+ </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container-fluid">
+
+    <div class="row">
+
+
+        <!-- ================= SIDEBAR ================= -->
+
+<!-- ================= SIDEBAR ================= -->
+
+<div class="col-lg-2">
+
+    <div class="sidebar">
+
+        <h5 class="mb-4 fw-bold">
+            Admin Panel
+        </h5>
+
+
+        <!-- DASHBOARD -->
+
+        <a
+            href="/admin/dashboard"
+            class="<%= currentSideBar === 'dashboard' ? 'active' : '' %>">
+
+            <i class="bi bi-speedometer2 me-2"></i>
+            Dashboard
+
+        </a>
+
+
+        <!-- USER MANAGEMENT -->
+
+        <a
+            href="/admin/userManagement"
+            class="<%= currentSideBar === 'userManagement' ? 'active' : '' %>">
+
+            <i class="bi bi-people me-2"></i>
+            User Management
+
+        </a>
+
+
+        <hr>
+
+
+        <!-- CATALOG MANAGEMENT -->
+
+        <h6 class="text-muted">
+            Catalog Management
+        </h6>
+
+
+        <a
+            href="/admin/category/categories"
+            class="<%= currentSideBar === 'categories' ? 'active' : '' %>">
+
+            <i class="bi bi-grid me-2"></i>
+            Categories
+
+        </a>
+
+
+        <a
+            href="/admin/product/products"
+            class="<%= currentSideBar === 'product' ? 'active' : '' %>">
+
+            <i class="bi bi-box me-2"></i>
+            Products
+
+        </a>
+
+
+        <hr>
+
+
+        <!-- ORDER MANAGEMENT -->
+
+        <h6 class="text-muted">
+            Order Management
+        </h6>
+
+
+        <a
+            href="/admin/orders"
+            class="<%= currentSideBar === 'orders' ? 'active' : '' %>">
+
+            <i class="bi bi-cart-check me-2"></i>
+            Orders
+
+        </a>
+
+
+        <a
+            href="/admin/coupons"
+            class="<%= currentSideBar === 'coupons' ? 'active' : '' %>">
+
+            <i class="bi bi-ticket-perforated me-2"></i>
+            Coupons
+
+        </a>
+
+
+        <hr>
+
+
+        <!-- SALES REPORT -->
+
+        <a
+            href="/admin/sales-report"
+            class="<%= currentSideBar === 'salesReport' ? 'active' : '' %>">
+
+            <i class="bi bi-bar-chart-line me-2"></i>
+            Sales Report
+
+        </a>
+
+
+        <!-- OFFERS -->
+
+        <a
+            href="/admin/offers/list"
+            class="<%= currentSideBar === 'offers' ? 'active' : '' %>">
+
+            <i class="bi bi-tags me-2"></i>
+            Offers
+
+        </a>
+
+
+        <hr>
+
+
+        <!-- LOGOUT -->
+
+        <a
+            href="/admin/logout"
+            class="logout">
+
+            <i class="bi bi-box-arrow-right me-2"></i>
+            Logout
+
+        </a>
+
+    </div>
+
+</div>
+
+
+        <!-- ================= MAIN CONTENT ================= -->
+
+        <div class="col-lg-10 p-4">
+
+
+            <div class="mb-4">
+
+                <h3 class="fw-bold">
+                    Add Coupon
+                </h3>
+
+                <p class="text-muted">
+                    Create a new coupon for your customers.
+                </p>
+
+            </div>
+
+
+            <!-- ================= FORM ================= -->
+
+            <div class="coupon-card">
+
+                <form id="couponForm">
+
+
+                    <!-- COUPON CODE -->
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Coupon Code
+                        </label>
+
+                        <input
+                            type="text"
+                            id="couponCode"
+                            class="form-control"
+                            placeholder="Example: SAVE20"
+                        >
+
+                        <small
+                            id="couponCodeError"
+                            class="error-message">
+                        </small>
+
+                    </div>
+
+
+                    <!-- DISCOUNT TYPE -->
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Discount Type
+                        </label>
+
+                        <select
+                            id="discountType"
+                            class="form-select">
+
+                            <option value="">
+                                Select discount type
+                            </option>
+
+                            <option value="percentage">
+                                Percentage
+                            </option>
+
+                            <option value="fixed">
+                                Fixed Amount
+                            </option>
+
+                        </select>
+
+                        <small
+                            id="discountTypeError"
+                            class="error-message">
+                        </small>
+
+                    </div>
+
+
+                    <!-- DISCOUNT VALUE -->
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Discount Value
+                        </label>
+
+                        <div class="input-group">
+
+                            <span
+                                class="input-group-text"
+                                id="discountSymbol">
+                                -
+                            </span>
+
+                            <input
+                                type="number"
+                                id="discountValue"
+                                class="form-control"
+                                placeholder="Enter discount value"
+                                min="0"
+                                step="0.01"
+                            >
+
+                        </div>
+
+                        <small
+                            id="discountValueError"
+                            class="error-message">
+                        </small>
+
+                    </div>
+
+
+                    <!-- MINIMUM CART VALUE -->
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Minimum Cart Value
+                        </label>
+
+                        <div class="input-group">
+
+                            <span class="input-group-text">
+                                ₹
+                            </span>
+
+                            <input
+                                type="number"
+                                id="minimumCartValue"
+                                class="form-control"
+                                placeholder="Minimum ₹1000"
+                                min="1000"
+                                step="1"
+                            >
+
+                        </div>
+
+                        <small
+                            id="minimumCartValueError"
+                            class="error-message">
+                        </small>
+
+                    </div>
+
+
+                    <!-- USAGE LIMIT -->
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Usage Limit
+                        </label>
+
+                        <input
+                            type="number"
+                            id="usageLimit"
+                            class="form-control"
+                            placeholder="Example: 10"
+                            min="1"
+                            step="1"
+                        >
+
+                        <small
+                            id="usageLimitError"
+                            class="error-message">
+                        </small>
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Status
+                        </label>
+
+                        <select
+                            id="isActive"
+                            class="form-select">
+
+                            <option value="">
+                                Select status
+                            </option>
+
+                            <option value="true">
+                                Active
+                            </option>
+
+                            <option value="false">
+                                Inactive
+                            </option>
+
+                        </select>
+
+                        <small
+                            id="isActiveError"
+                            class="error-message">
+                        </small>
+
+                    </div>
+
+
+                    <!-- EXPIRY DATE -->
+
+                    <div class="mb-4">
+
+                        <label class="form-label fw-semibold">
+                            Expiry Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="expiryDate"
+                            class="form-control"
+                        >
+
+                        <small
+                            id="expiryDateError"
+                            class="error-message">
+                        </small>
+
+                    </div>
+
+
+                    <!-- BUTTONS -->
+
+                    <div class="d-flex gap-2">
+
+                        <a
+                            href="/admin/coupons"
+                            class="btn btn-secondary">
+
+                            Cancel
+
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="btn btn-dark">
+
+                            <i class="bi bi-plus-lg me-1"></i>
+
+                            Create Coupon
+
+                        </button>
+
+                    </div>
+
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+// =====================================================
+// GET ELEMENTS
+// =====================================================
+
+const couponForm =
+    document.getElementById("couponForm");
+
+const couponCode =
+    document.getElementById("couponCode");
+
+const discountType =
+    document.getElementById("discountType");
+
+const discountValue =
+    document.getElementById("discountValue");
+
+const minimumCartValue =
+    document.getElementById("minimumCartValue");
+
+const usageLimit =
+    document.getElementById("usageLimit");
+
+const isActive =
+    document.getElementById("isActive");
+
+const expiryDate =
+    document.getElementById("expiryDate");
+
+const discountSymbol =
+    document.getElementById("discountSymbol");
+
+
+// =====================================================
+// CHANGE DISCOUNT SYMBOL
+// =====================================================
+
+discountType.addEventListener("change", () => {
+
+    if (discountType.value === "percentage") {
+
+        discountSymbol.innerText = "%";
+
+        discountValue.placeholder =
+            "Enter percentage (maximum 50%)";
+
+    }
+
+    else if (discountType.value === "fixed") {
+
+        discountSymbol.innerText = "₹";
+
+        discountValue.placeholder =
+            "Enter fixed discount";
+
+    }
+
+    else {
+
+        discountSymbol.innerText = "-";
+
+        discountValue.placeholder =
+            "Enter discount value";
+
+    }
+
+});
+
+
+// =====================================================
+// CLEAR ERRORS
+// =====================================================
+
+function clearErrors() {
+
+    document.querySelectorAll(".error-message")
+        .forEach(error => {
+
+            error.innerText = "";
+
+        });
+
+}
+
+
+// =====================================================
+// VALIDATION
+// =====================================================
+
+function validateForm() {
+
+    clearErrors();
+
+    let isValid = true;
+
+
+    // ---------------------------------------------
+    // COUPON CODE
+    // ---------------------------------------------
+
+    const code =
+        couponCode.value.trim();
+
+    if (code === "") {
+
+        document.getElementById("couponCodeError")
+            .innerText =
+            "Coupon code is required.";
+
+        isValid = false;
+
+    }
+
+    else if (code.length <= 5) {
+
+        document.getElementById("couponCodeError")
+            .innerText =
+            "Coupon code must contain more than 5 characters.";
+
+        isValid = false;
+
+    }
+
+    else if (code !== code.toUpperCase()) {
+
+        document.getElementById("couponCodeError")
+            .innerText =
+            "Coupon code must be uppercase.";
+
+        isValid = false;
+
+    }
+
+
+    // ---------------------------------------------
+    // DISCOUNT TYPE
+    // ---------------------------------------------
+
+    if (discountType.value === "") {
+
+        document.getElementById("discountTypeError")
+            .innerText =
+            "Please select a discount type.";
+
+        isValid = false;
+
+    }
+
+
+    // ---------------------------------------------
+    // DISCOUNT VALUE
+    // ---------------------------------------------
+
+    const discount =
+        Number(discountValue.value);
+
+    if (discountValue.value === "") {
+
+        document.getElementById("discountValueError")
+            .innerText =
+            "Discount value is required.";
+
+        isValid = false;
+
+    }
+
+    else if (discount <= 0) {
+
+        document.getElementById("discountValueError")
+            .innerText =
+            "Discount value must be greater than 0.";
+
+        isValid = false;
+
+    }
+
+    else if (
+        discountType.value === "percentage" &&
+        discount > 50
+    ) {
+
+        document.getElementById("discountValueError")
+            .innerText =
+            "Percentage discount cannot exceed 50%.";
+
+        isValid = false;
+
+    }
+
+
+    // ---------------------------------------------
+    // MINIMUM CART VALUE
+    // ---------------------------------------------
+
+    const minimumCart =
+        Number(minimumCartValue.value);
+
+    if (minimumCartValue.value === "") {
+
+        document.getElementById("minimumCartValueError")
+            .innerText =
+            "Minimum cart value is required.";
+
+        isValid = false;
+
+    }
+
+    else if (minimumCart < 1000) {
+
+        document.getElementById("minimumCartValueError")
+            .innerText =
+            "Minimum cart value must be at least ₹1000.";
+
+        isValid = false;
+
+    }
+
+
+    // ---------------------------------------------
+    // FIXED DISCOUNT VS MINIMUM CART
+    // ---------------------------------------------
+
+    if (
+        discountType.value === "fixed" &&
+        discount > minimumCart &&
+        minimumCartValue.value !== ""
+    ) {
+
+        document.getElementById("discountValueError")
+            .innerText =
+            "Fixed discount cannot be greater than the minimum cart value.";
+
+        isValid = false;
+
+    }
+
+
+    // ---------------------------------------------
+    // USAGE LIMIT
+    // ---------------------------------------------
+
+    const limit =
+        Number(usageLimit.value);
+
+    if (usageLimit.value === "") {
+
+        document.getElementById("usageLimitError")
+            .innerText =
+            "Usage limit is required.";
+
+        isValid = false;
+
+    }
+
+    else if (limit <= 0) {
+
+        document.getElementById("usageLimitError")
+            .innerText =
+            "Usage limit must be greater than 0.";
+
+        isValid = false;
+
+    }
+
+
+    // ---------------------------------------------
+    // STATUS
+    // ---------------------------------------------
+
+    if (isActive.value === "") {
+
+        document.getElementById("isActiveError")
+            .innerText =
+            "Please select the coupon status.";
+
+        isValid = false;
+
+    }
+
+
+    // ---------------------------------------------
+    // EXPIRY DATE
+    // ---------------------------------------------
+
+    if (expiryDate.value === "") {
+
+        document.getElementById("expiryDateError")
+            .innerText =
+            "Expiry date is required.";
+
+        isValid = false;
+
+    }
+
+    else {
+
+        const today = new Date();
+
+        today.setHours(0, 0, 0, 0);
+
+        const selectedDate =
+            new Date(expiryDate.value);
+
+        if (selectedDate <= today) {
+
+            document.getElementById("expiryDateError")
+                .innerText =
+                "Expiry date must be a future date.";
+
+            isValid = false;
+
+        }
+
+    }
+
+
+    return isValid;
+
+}
+
+
+// =====================================================
+// FORM SUBMIT
+// =====================================================
+
+couponForm.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+
+    // ---------------------------------------------
+    // FRONTEND VALIDATION
+    // ---------------------------------------------
+
+    if (!validateForm()) {
+
+        return;
+
+    }
+
+
+    // ---------------------------------------------
+    // DATA TO BACKEND
+    // ---------------------------------------------
+
+    const couponData = {
+
+        couponCode:
+            couponCode.value.trim().toUpperCase(),
+
+        discountType:
+            discountType.value,
+
+        discountValue:
+            Number(discountValue.value),
+
+        minimumCartValue:
+            Number(minimumCartValue.value),
+
+        usageLimit:
+            Number(usageLimit.value),
+
+        isActive:
+            isActive.value === "true",
+
+        expiryDate:
+            expiryDate.value
+
+    };
+
+
+    try {
+
+        const response =
+            await fetch("/admin/coupons/add", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body:
+                    JSON.stringify(couponData)
+
+            });
+
+
+        const data =
+            await response.json();
+
+
+        // ---------------------------------------------
+        // BACKEND ERROR
+        // ---------------------------------------------
+
+        if (!data.success) {
+
+            Swal.fire({
+
+                icon: "error",
+
+                title: "Coupon Error",
+
+                text: data.message
+
+            });
+
+            return;
+
+        }
+
+
+        // ---------------------------------------------
+        // SUCCESS
+        // ---------------------------------------------
+
+        Swal.fire({
+
+            icon: "success",
+
+            title: "Coupon Created",
+
+            text: "Coupon has been created successfully.",
+
+            confirmButtonText: "OK"
+
+        }).then(() => {
+
+            window.location.href =
+                "/admin/coupons";
+
+        });
+
+
+    }
+
+    catch (error) {
+
+        console.log(error);
+
+        Swal.fire({
+
+            icon: "error",
+
+            title: "Something went wrong",
+
+            text: "Unable to create coupon."
+
+        });
+
+    }
+
+});
+
+
+// =====================================================
+// EXISTING SESSION ALERT
+// =====================================================
+
+const alertData =
+    <%- JSON.stringify(alert || null) %>;
+
+
+if (alertData) {
+
+    Swal.fire({
+
+        icon: alertData.type,
+
+        title: alertData.message,
+
+        confirmButtonText: "OK"
+
+    });
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>

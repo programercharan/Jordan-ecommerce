@@ -1,0 +1,2157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Checkout</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <style>
+
+        body {
+            background: #f8f9fa;
+        }
+
+        .checkout-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .product-image {
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .coupon-card {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+
+        .coupon-card.applied {
+            border: 2px solid #198754;
+        }
+
+        .coupon-code {
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .price-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .discount-text {
+            color: #198754;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+        <!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+
+        <a class="navbar-brand fw-bold" href="/user/home">
+            JORDAN
+        </a>
+
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav">
+
+            <span class="navbar-toggler-icon"></span>
+
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+
+            <ul class="navbar-nav">
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/home">Home</a>
+                </li>
+
+<li class="nav-item">
+
+    <a
+        class="nav-link position-relative"
+        href="/user/wishlist"
+    >
+
+        <i class="bi bi-heart fs-5"></i>
+
+        <% if (wishlistCount > 0) { %>
+
+            <span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+            >
+
+                <%= wishlistCount %>
+
+            </span>
+
+        <% } %>
+
+    </a>
+
+</li>
+
+
+<li class="nav-item">
+
+<a
+class="nav-link position-relative"
+href="/user/cart">
+
+<i class="bi bi-cart3 fs-5"></i>
+
+</a>
+
+</li>
+
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/profile">Profile</a>
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+</nav>
+
+<div class="container py-5">
+
+    <h2 class="fw-bold mb-4">
+        Checkout
+    </h2>
+
+
+    <div class="row g-4">
+
+
+        <!-- ================================================= -->
+        <!-- LEFT SIDE -->
+        <!-- ================================================= -->
+
+        <div class="col-lg-7">
+
+
+            <!-- ================= ADDRESS ================= -->
+
+            <div class="checkout-card mb-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+
+                    <h5 class="fw-bold mb-0">
+                        Delivery Address
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-dark btn-sm"
+                        id="showAddressForm">
+
+                        <i class="bi bi-plus-lg"></i>
+
+                        Add Address
+
+                    </button>
+
+                </div>
+
+
+                <!-- ADDRESS LIST -->
+
+                <div id="addressList">
+
+                    <% if(address && address.length > 0){ %>
+
+                        <% address.forEach((addr,index)=>{ %>
+
+                            <div
+                                class="border rounded p-3 mb-2 address-card">
+
+                                <div class="form-check">
+
+                                    <input
+                                        class="form-check-input address-radio"
+                                        type="radio"
+                                        name="address"
+                                        value="<%= addr._id %>"
+                                        id="address_<%= addr._id %>"
+                                        <%= index === 0 ? "checked" : "" %>
+                                    >
+
+                                    <label
+                                        class="form-check-label w-100"
+                                        for="address_<%= addr._id %>">
+
+                                        <strong>
+                                            <%= addr.firstName %>
+                                            <%= addr.lastName || "" %>
+                                        </strong>
+
+                                        <br>
+
+                                        <small>
+
+                                            <%= addr.address %>,
+
+                                            <%= addr.city %>,
+
+                                            <%= addr.state %> -
+
+                                            <%= addr.pincode %>
+
+                                            <br>
+
+                                            Phone:
+                                            <%= addr.phoneNumber %>
+
+                                        </small>
+
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+                        <% }) %>
+
+                    <% } else { %>
+
+                        <p class="text-muted">
+                            No address available.
+                        </p>
+
+                    <% } %>
+
+                </div>
+
+
+                <!-- SELECTED ADDRESS -->
+
+                <input
+                    type="hidden"
+                    id="selectedAddressId"
+                    value="<%= address && address.length > 0 ? address[0]._id : '' %>"
+                >
+
+
+                <!-- ADD ADDRESS FORM -->
+
+<div
+    id="addressFormCard"
+    class="border rounded p-3 mt-3 d-none">
+
+    <h5 class="fw-bold mb-3" id="addressFormTitle">
+        Add New Address
+    </h5>
+
+<form
+    id="addressForm"
+    action="/user/addaddress"
+    method="POST"
+    novalidate>
+
+    <input
+        type="hidden"
+        name="redirectPage"
+        value="checkout"
+    >
+
+    <div class="mb-3">
+
+        <label class="form-label">
+            First Name
+        </label>
+
+        <input
+            type="text"
+            name="firstName"
+            id="firstName"
+            class="form-control"
+        >
+
+        <div style="min-height:1em;">
+            <small
+                id="firstNameError"
+                class="text-danger">
+            </small>
+        </div>
+
+    </div>
+
+
+    <div class="mb-3">
+
+        <label class="form-label">
+            Last Name
+        </label>
+
+        <input
+            type="text"
+            name="LastName"
+            id="lastName"
+            class="form-control"
+        >
+
+        <div style="min-height:1em;">
+            <small
+                id="lastNameError"
+                class="text-danger">
+            </small>
+        </div>
+
+    </div>
+
+
+    <div class="mb-3">
+
+        <label class="form-label">
+            Address
+        </label>
+
+        <textarea
+            name="address"
+            id="address"
+            class="form-control"
+            rows="3"></textarea>
+
+        <div style="min-height:1em;">
+            <small
+                id="addressError"
+                class="text-danger">
+            </small>
+        </div>
+
+    </div>
+
+
+    <div class="mb-3">
+
+        <label class="form-label">
+            City
+        </label>
+
+        <input
+            type="text"
+            name="city"
+            id="city"
+            class="form-control"
+        >
+
+        <div style="min-height:1em;">
+            <small
+                id="cityError"
+                class="text-danger">
+            </small>
+        </div>
+
+    </div>
+
+
+    <div class="mb-3">
+
+        <label class="form-label">
+            State
+        </label>
+
+        <input
+            type="text"
+            name="state"
+            id="state"
+            class="form-control"
+        >
+
+        <div style="min-height:1em;">
+            <small
+                id="stateError"
+                class="text-danger">
+            </small>
+        </div>
+
+    </div>
+
+
+    <div class="mb-3">
+
+        <label class="form-label">
+            Pincode
+        </label>
+
+        <input
+            type="text"
+            name="pincode"
+            id="pincode"
+            class="form-control"
+        >
+
+        <div style="min-height:1em;">
+            <small
+                id="pincodeError"
+                class="text-danger">
+            </small>
+        </div>
+
+    </div>
+
+
+    <div class="mb-3">
+
+        <label class="form-label">
+            Phone Number
+        </label>
+
+        <input
+            type="text"
+            name="phoneNumber"
+            id="phoneNumber"
+            class="form-control"
+        >
+
+        <div style="min-height:1em;">
+            <small
+                id="phoneNumberError"
+                class="text-danger">
+            </small>
+        </div>
+
+    </div>
+
+
+    <button
+        type="submit"
+        class="btn btn-dark">
+
+        Save Address
+
+    </button>
+
+</form>
+
+</div>
+
+            </div>
+
+
+
+            <!-- ================= PRODUCTS ================= -->
+
+            <div class="checkout-card mb-4">
+
+                <h5 class="fw-bold mb-4">
+                    Your Products
+                </h5>
+
+
+               <% if(productAndVariant && productAndVariant.length > 0){ %>
+
+
+    <% productAndVariant.forEach((eachVariant, index) => { %>
+
+
+        <% if(eachVariant.variant){ %>
+
+
+            <div
+                class="product-row mb-4"
+                data-item-index="<%= index %>"
+            >
+
+
+                <div class="d-flex align-items-start">
+
+
+                    <!-- IMAGE -->
+
+                    <img
+                        src="<%= eachVariant.variant.images[0] %>"
+                        class="product-image me-3"
+                        alt="Product"
+                    >
+
+
+                    <!-- PRODUCT DETAILS -->
+
+                    <div class="flex-grow-1">
+
+
+                        <h6 class="fw-bold mb-1">
+
+                            <%= eachVariant.variant.productId.name %>
+
+                        </h6>
+
+
+                        <p class="small mb-1">
+
+                            Size:
+
+                            <%= cart.items[index].size %>
+
+                        </p>
+
+
+                        <p class="small mb-2">
+
+                            Quantity:
+
+                            <%= eachVariant.quantity %>
+
+                        </p>
+
+
+                        <!-- ORIGINAL SALE PRICE -->
+
+                        <div class="small">
+
+                            Original:
+
+                            ₹<span class="item-original-price">
+
+                                <%= eachVariant.variant.salePrice *
+                                    eachVariant.quantity %>
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- OFFER -->
+
+                        <% if(eachVariant.offerPrice.offerApplied){ %>
+
+
+                            <div class="small text-success">
+
+                                Offer:
+
+                                <%= eachVariant.offerPrice.discountPercentage %>%
+                                OFF
+
+                            </div>
+
+
+                        <% } %>
+
+
+                        <!-- COUPON DISCOUNT -->
+
+                        <div
+                            class="small discount-text item-discount d-none"
+                        >
+
+                            Coupon Discount:
+
+                            -₹<span>0</span>
+
+                        </div>
+
+
+                        <!-- FINAL ITEM PRICE -->
+
+                        <div class="fw-bold mt-1">
+
+                            You Pay:
+
+                            ₹<span class="item-final-price">
+
+                                <%= eachVariant.itemTotal %>
+
+                            </span>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <hr>
+
+
+        <% } %>
+
+
+    <% }) %>
+
+
+<% } else { %>
+
+
+    <p class="text-muted">
+
+        Your cart is empty.
+
+    </p>
+
+
+<% } %>
+
+
+            </div>
+
+
+
+            <!-- ================= COUPONS ================= -->
+
+            <div class="checkout-card mb-4">
+
+                <h5 class="fw-bold mb-3">
+                    Available Coupons
+                </h5>
+
+
+                <% if(coupons && coupons.length > 0){ %>
+
+
+                    <div id="couponList">
+
+
+                        <% coupons.forEach(coupon => { %>
+
+
+                            <div
+                                class="coupon-card"
+                                data-coupon-id="<%= coupon._id %>">
+
+
+                                <div class="d-flex justify-content-between align-items-center">
+
+
+                                    <div>
+
+
+                                        <div class="coupon-code">
+
+                                            <%= coupon.couponCode %>
+
+                                        </div>
+
+
+                                        <div class="small text-muted mt-1">
+
+
+                                            <% if(coupon.discountType === "percentage"){ %>
+
+                                                <%= coupon.discountValue %>% OFF
+
+                                            <% } else { %>
+
+                                                ₹<%= coupon.discountValue %> OFF
+
+                                            <% } %>
+
+
+                                        </div>
+
+
+                                        <div class="small text-muted">
+
+                                            Minimum cart:
+                                            ₹<%= coupon.minimumCartValue %>
+
+                                        </div>
+
+
+                                        <div class="small text-muted">
+
+                                            Expires:
+                                            <%= new Date(coupon.expiryDate)
+                                                .toLocaleDateString() %>
+
+                                        </div>
+
+
+                                    </div>
+
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-dark btn-sm coupon-btn"
+                                        data-coupon-id="<%= coupon._id %>">
+
+                                        Apply
+
+                                    </button>
+
+
+                                </div>
+
+
+                            </div>
+
+
+                        <% }) %>
+
+
+                    </div>
+
+
+                <% } else { %>
+
+
+                    <p class="text-muted mb-0">
+
+                        No coupons available.
+
+                    </p>
+
+
+                <% } %>
+
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- RIGHT SIDE -->
+        <!-- ================================================= -->
+
+        <div class="col-lg-5">
+
+
+            <div class="checkout-card">
+
+
+                <h5 class="fw-bold mb-4">
+                    Order Summary
+                </h5>
+
+
+                <!-- SUBTOTAL -->
+
+                <div class="price-line">
+
+                    <span>
+                        Subtotal
+                    </span>
+
+                    <strong id="subtotalAmount">
+
+                        ₹<%= subtotal %>
+
+                    </strong>
+
+                </div>
+
+
+                <!-- SHIPPING -->
+
+
+<div class="price-line">
+
+    <span>
+        Shipping
+    </span>
+
+    <strong>
+        ₹<%= shipping %>
+    </strong>
+
+</div>
+
+
+
+                <!-- COUPON -->
+
+                <div class="price-line">
+
+                    <span>
+                        Coupon Discount
+                    </span>
+
+                    <strong
+                        class="discount-text"
+                        id="couponDiscountAmount">
+
+                        ₹0
+
+                    </strong>
+
+                </div>
+
+
+                <hr>
+
+
+                <!-- GRAND TOTAL -->
+
+                <div class="price-line mb-4">
+
+                    <h5 class="fw-bold">
+                        Grand Total
+                    </h5>
+
+                    <h5
+                        class="fw-bold"
+                        id="grandTotalAmount">
+
+                        ₹<%= grandTotal %>
+
+                    </h5>
+
+                </div>
+
+
+
+                <!-- ================= PAYMENT ================= -->
+
+                <div class="border rounded p-3 mb-4">
+
+
+                    <h5 class="fw-bold mb-3">
+
+                        Payment Method
+
+                    </h5>
+
+
+                    <div class="form-check">
+
+                        <input
+                            class="form-check-input"
+                            type="radio"
+                            name="paymentMethod"
+                            checked
+                            value="Cash on Delivery">
+
+                        <label class="form-check-label">
+
+                            Cash on Delivery
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="form-check mt-2">
+
+                        <input
+                            class="form-check-input"
+                            type="radio"
+                            name="paymentMethod"
+                            value="Razorpay">
+
+                        <label class="form-check-label">
+
+                            Razorpay
+
+                        </label>
+
+                    </div>
+
+                    <div class="form-check mt-2">
+
+    <input
+        class="form-check-input"
+        type="radio"
+        name="paymentMethod"
+        value="Wallet">
+
+    <label class="form-check-label">
+        Wallet
+    </label>
+
+</div>
+
+
+                </div>
+
+
+
+                <!-- ================= PLACE ORDER ================= -->
+
+                <form
+                    id="placeOrderForm"
+                    class="mt-4 pb-3">
+
+
+                    <input
+                        type="hidden"
+                        name="selectedAddressId"
+                        id="selectedAddressId">
+
+
+                    <input
+                        type="hidden"
+                        name="paymentMethod"
+                        value="Cash on Delivery">
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-dark w-100 py-3 rounded-3 fw-bold">
+
+                        Place Order
+
+                    </button>
+
+
+                </form>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+<script
+src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+
+const addressForm =
+    document.getElementById("addressForm");
+
+
+if (addressForm) {
+
+    addressForm.addEventListener("submit", (e) => {
+
+        e.preventDefault();
+
+
+        let hasError = false;
+
+
+        // ==============================
+        // REGEX
+        // ==============================
+
+        const phoneRegex =
+            /^[0-9]{10}$/;
+
+
+        const pincodeRegex =
+            /^[0-9]{6}$/;
+
+
+        // ==============================
+        // GET VALUES
+        // ==============================
+
+        const firstName =
+            document.getElementById("firstName")
+                .value.trim();
+
+
+        const LastName =
+            document.getElementById("lastName")
+                .value.trim();
+
+
+        const address =
+            document.getElementById("address")
+                .value.trim();
+
+
+        const city =
+            document.getElementById("city")
+                .value.trim();
+
+
+        const state =
+            document.getElementById("state")
+                .value.trim();
+
+
+        const pincode =
+            document.getElementById("pincode")
+                .value.trim();
+
+
+        const phoneNumber =
+            document.getElementById("phoneNumber")
+                .value.trim();
+
+
+        // ==============================
+        // ERROR ELEMENTS
+        // ==============================
+
+        const firstNameError =
+            document.getElementById("firstNameError");
+
+
+        const LastNameError =
+            document.getElementById("lastNameError");
+
+
+        const addressError =
+            document.getElementById("addressError");
+
+
+        const cityError =
+            document.getElementById("cityError");
+
+
+        const stateError =
+            document.getElementById("stateError");
+
+
+        const pincodeError =
+            document.getElementById("pincodeError");
+
+
+        const phoneNumberError =
+            document.getElementById("phoneNumberError");
+
+
+        // ==============================
+        // CLEAR OLD ERRORS
+        // ==============================
+
+        firstNameError.innerText = "";
+
+        LastNameError.innerText = "";
+
+        addressError.innerText = "";
+
+        cityError.innerText = "";
+
+        stateError.innerText = "";
+
+        pincodeError.innerText = "";
+
+        phoneNumberError.innerText = "";
+
+
+        // ==============================
+        // FIRST NAME
+        // ==============================
+
+        if (firstName === "") {
+
+            firstNameError.innerText =
+                "Enter first name";
+
+            hasError = true;
+
+        }
+
+
+        // ==============================
+        // LAST NAME
+        // ==============================
+
+        if (LastName === "") {
+
+            LastNameError.innerText =
+                "Enter last name";
+
+            hasError = true;
+
+        }
+
+
+        // ==============================
+        // ADDRESS
+        // ==============================
+
+        if (address === "") {
+
+            addressError.innerText =
+                "Enter address";
+
+            hasError = true;
+
+        }
+
+
+        // ==============================
+        // CITY
+        // ==============================
+
+        if (city === "") {
+
+            cityError.innerText =
+                "Enter city";
+
+            hasError = true;
+
+        }
+
+
+        // ==============================
+        // STATE
+        // ==============================
+
+        if (state === "") {
+
+            stateError.innerText =
+                "Enter state";
+
+            hasError = true;
+
+        }
+
+
+        // ==============================
+        // PINCODE
+        // ==============================
+
+        if (pincode === "") {
+
+            pincodeError.innerText =
+                "Enter pincode";
+
+            hasError = true;
+
+        } else if (!pincodeRegex.test(pincode)) {
+
+            pincodeError.innerText =
+                "Enter valid pincode";
+
+            hasError = true;
+
+        }
+
+
+        // ==============================
+        // PHONE NUMBER
+        // ==============================
+
+        if (phoneNumber === "") {
+
+            phoneNumberError.innerText =
+                "Enter phone number";
+
+            hasError = true;
+
+        } else if (!phoneRegex.test(phoneNumber)) {
+
+            phoneNumberError.innerText =
+                "Enter valid phone number";
+
+            hasError = true;
+
+        }
+
+
+        // ==============================
+        // SUBMIT
+        // ==============================
+
+        if (!hasError) {
+
+            addressForm.submit();
+
+        }
+
+    });
+
+}
+
+</script>
+
+
+<script>
+
+
+// =====================================================
+// ADDRESS
+// =====================================================
+
+const showAddressFormBtn =
+    document.getElementById("showAddressForm");
+
+const addressFormCard =
+    document.getElementById("addressFormCard");
+
+
+showAddressFormBtn.addEventListener("click", () => {
+
+    addressFormCard.classList.toggle("d-none");
+
+});
+
+
+
+const addressRadios =
+    document.querySelectorAll(".address-radio");
+
+
+addressRadios.forEach(radio => {
+
+    radio.addEventListener("change", () => {
+
+        document.getElementById("selectedAddressId").value =
+            radio.value;
+
+    });
+
+});
+
+
+
+// =====================================================
+// COUPON
+// =====================================================
+
+let appliedCouponId = null;
+
+
+
+const couponButtons =
+    document.querySelectorAll(".coupon-btn");
+
+
+couponButtons.forEach(button => {
+
+
+    button.addEventListener("click", async () => {
+
+
+        const couponId =
+            button.dataset.couponId;
+
+
+        // =============================================
+        // REMOVE COUPON
+        // =============================================
+
+        if(appliedCouponId === couponId){
+
+            try {
+
+
+                const response = await fetch(
+                    "/user/coupon/remove",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    }
+                );
+
+
+                const result =
+                    await response.json();
+                    console.log(result)
+
+                if(!result.success){
+
+                    Swal.fire({
+                        icon: "error",
+                        title: result.message
+                    });
+
+                    return;
+
+                }
+
+
+                appliedCouponId = null;
+
+
+                // Reset summary
+
+                document.getElementById(
+                    "couponDiscountAmount"
+                ).innerText = "₹0";
+
+
+                document.getElementById(
+                    "grandTotalAmount"
+                ).innerText = "₹" + result.grandTotal;
+
+
+                // Reset every product
+
+                document
+                    .querySelectorAll(".product-row")
+                    .forEach(row => {
+
+                        const original =
+                            row.querySelector(
+                                ".item-original-price"
+                            ).innerText;
+
+
+                        row.querySelector(
+                            ".item-final-price"
+                        ).innerText = original;
+
+
+                        const discount =
+                            row.querySelector(
+                                ".item-discount"
+                            );
+
+                        discount.classList.add("d-none");
+
+                        discount.querySelector("span")
+                            .innerText = "0";
+
+                    });
+
+
+                // Change button
+
+                button.innerText = "Apply";
+
+                button.classList.remove("btn-success");
+
+                button.classList.add("btn-outline-dark");
+
+
+            } catch(error){
+
+                console.log(error);
+
+            }
+
+            return;
+
+        }
+
+
+
+        // =============================================
+        // IF ANOTHER COUPON IS ALREADY APPLIED
+        // =============================================
+
+        if(appliedCouponId){
+
+            Swal.fire({
+                icon: "warning",
+                title: "Coupon already applied",
+                text: "Remove the current coupon before applying another."
+            });
+
+            return;
+
+        }
+
+
+
+        // =============================================
+        // APPLY COUPON
+        // =============================================
+
+        try {
+
+
+            const response = await fetch(
+                "/user/coupon/apply",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        couponId: couponId
+                    })
+
+                }
+            );
+
+
+            const result =
+                await response.json();
+
+
+            console.log(
+                "Coupon response:",
+                result
+            );
+
+
+            if(!result.success){
+
+                Swal.fire({
+                    icon: "error",
+                    title: result.message
+                });
+
+                return;
+
+            }
+
+
+
+            // =========================================
+            // STORE APPLIED COUPON
+            // =========================================
+
+            appliedCouponId = couponId;
+
+
+
+            // =========================================
+            // UPDATE SUMMARY
+            // =========================================
+
+            document.getElementById(
+                "couponDiscountAmount"
+            ).innerText =
+                "₹" + result.couponDiscount;
+
+
+            document.getElementById(
+                "grandTotalAmount"
+            ).innerText =
+                "₹" + result.grandTotal;
+
+
+
+            // =========================================
+            // UPDATE EACH PRODUCT
+            // =========================================
+
+            result.items.forEach((item, index) => {
+
+
+                const row =
+                    document.querySelector(
+                        `.product-row[data-item-index="${index}"]`
+                    );
+
+
+                if(!row){
+                    return;
+                }
+
+
+                row.querySelector(
+                    ".item-final-price"
+                ).innerText =
+                    item.finalAmount;
+
+
+                const discountElement =
+                    row.querySelector(
+                        ".item-discount"
+                    );
+
+
+                discountElement
+                    .classList
+                    .remove("d-none");
+
+
+                discountElement.querySelector(
+                    "span"
+                ).innerText =
+                    item.discountAmount;
+
+            });
+
+
+
+            // =========================================
+            // BUTTON
+            // =========================================
+
+            button.innerText =
+                "Remove";
+
+
+            button.classList.remove(
+                "btn-outline-dark"
+            );
+
+
+            button.classList.add(
+                "btn-success"
+            );
+
+
+        } catch(error){
+
+
+            console.log(
+                "Coupon frontend error:",
+                error
+            );
+
+
+            Swal.fire({
+
+                icon: "error",
+
+                title: "Something went wrong",
+
+                text: error.message
+
+            });
+
+        }
+
+
+    });
+
+});
+
+
+
+// =====================================================
+// PLACE ORDER
+// =====================================================
+
+document
+.getElementById("placeOrderForm")
+.addEventListener("submit", async function(e) {
+
+
+    e.preventDefault();
+
+
+    const selectedAddressId =
+        document.getElementById(
+            "selectedAddressId"
+        ).value;
+
+
+    const paymentMethod =
+        document.querySelector(
+            'input[name="paymentMethod"]:checked'
+        ).value;
+
+
+
+    if(!selectedAddressId){
+
+        Swal.fire({
+
+            icon: "warning",
+
+            title: "Select Address",
+
+            text: "Please select a delivery address."
+
+        });
+
+        return;
+
+    }
+
+
+
+    try {
+
+
+        // =================================================
+        // RAZORPAY
+        // =================================================
+
+        if(paymentMethod === "Razorpay"){
+
+
+            console.log(
+                "Razorpay selected"
+            );
+
+
+            const response =
+                await fetch(
+                    "/user/payment/create-order",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+
+                            selectedAddressId:
+                                selectedAddressId,
+
+                            paymentMethod:
+                                paymentMethod
+
+                        })
+
+                    }
+                );
+
+
+            const result =
+                await response.json();
+
+
+            console.log(
+                "Response from backend:"
+            );
+
+            console.log(result);
+
+
+
+            if(!result.success){
+
+                Swal.fire({
+
+                    icon: "error",
+
+                    title: "Razorpay Error",
+
+                    text: result.message
+
+                });
+
+                return;
+
+            }
+
+
+
+            const razorpayOrder =
+                result.razorpayOrder;
+
+
+
+            const options = {
+
+                key:
+                    "<%= razorpayKeyId %>",
+
+                amount:
+                    razorpayOrder.amount,
+
+                currency:
+                    razorpayOrder.currency,
+
+                name:
+                    "JORDAN SHOES",
+
+                description:
+                    "Test Payment",
+
+                order_id:
+                    razorpayOrder.id,
+
+
+                handler:
+                    async function(paymentResponse){
+
+
+                        try {
+
+
+                            const verifyResponse =
+                                await fetch(
+                                    "/user/payment/verify",
+                                    {
+
+                                        method: "POST",
+
+                                        headers: {
+                                            "Content-Type":
+                                                "application/json"
+                                        },
+
+                                        body:
+                                        JSON.stringify({
+
+                                            razorpay_order_id:
+                                                paymentResponse
+                                                .razorpay_order_id,
+
+                                            razorpay_payment_id:
+                                                paymentResponse
+                                                .razorpay_payment_id,
+
+                                            razorpay_signature:
+                                                paymentResponse
+                                                .razorpay_signature,
+
+                                            selectedAddressId:
+                                                selectedAddressId,
+
+                                            paymentMethod:
+                                                paymentMethod
+
+                                        })
+
+                                    }
+                                );
+
+
+                            const result =
+                                await verifyResponse.json();
+
+
+                            console.log(
+                                "Verification response:",
+                                result
+                            );
+
+
+                            if(result.success){
+
+                                Swal.fire({
+
+                                    icon: "success",
+
+                                    title:
+                                        "Payment Successful",
+
+                                    text:
+                                        "Your order has been placed successfully."
+
+                                }).then(() => {
+
+                                    window.location.href =
+                                        "/user/order/success/"
+                                        + result.orderId;
+
+                                });
+
+                            } else {
+
+                                window.location.href =
+                                    "/user/payment/failure";
+
+                            }
+
+
+                        } catch(error){
+
+
+                            console.log(
+                                "Verification frontend error:",
+                                error
+                            );
+
+
+                            Swal.fire({
+
+                                icon: "error",
+
+                                title:
+                                    "Something went wrong",
+
+                                text:
+                                    "Unable to verify payment."
+
+                            });
+
+                        }
+
+                    },
+
+
+                modal: {
+
+                    ondismiss: function(){
+
+                        console.log(
+                            "Razorpay popup closed"
+                        );
+
+                        window.location.href =
+                            "/user/payment/failure";
+
+                    }
+
+                }
+
+            };
+
+
+
+            const razorpay =
+                new Razorpay(options);
+
+
+
+            razorpay.on(
+                "payment.failed",
+                async function(response){
+
+                    console.log(
+                        "Payment failed"
+                    );
+
+                    console.log(
+                        response.error
+                    );
+
+
+                    await fetch(
+                        "/user/payment/failed",
+                        {
+                            method: "POST"
+                        }
+                    );
+
+
+                    window.location.href =
+                        "/user/payment/failure";
+
+                }
+            );
+
+
+            razorpay.open();
+
+
+            return;
+
+        }
+
+else if (paymentMethod === "Wallet") {
+
+    const response =
+        await fetch(
+            "/user/payment/wallet",
+            {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    selectedAddressId:
+                        selectedAddressId,
+
+                    paymentMethod:
+                        "Wallet"
+
+                })
+
+            }
+        );
+
+
+    const result =
+        await response.json();
+
+
+    console.log(
+        "Wallet payment response:",
+        result
+    );
+
+
+    if (!result.success) {
+
+        Swal.fire({
+
+            icon: "error",
+
+            title: "Wallet Payment",
+
+            text: result.message
+
+        });
+
+        return;
+
+    }
+
+
+    Swal.fire({
+
+        icon: "success",
+
+        title: "Payment Successful",
+
+        text:
+            "Your order has been placed successfully."
+
+    }).then(() => {
+
+        window.location.href =
+            "/user/order/success/" +
+            result.orderId;
+
+    });
+
+
+    return;
+}
+
+        // =================================================
+        // CASH ON DELIVERY
+        // =================================================
+
+        // const response =
+        //     await fetch(
+        //         "/user/order/place",
+        //         {
+
+        //             method: "POST",
+
+        //             headers: {
+        //                 "Content-Type":
+        //                     "application/json"
+        //             },
+
+        //             body: JSON.stringify({
+
+        //                 selectedAddressId,
+
+        //                 paymentMethod
+
+        //             })
+
+        //         }
+        //     );
+
+
+        // console.log(response);
+
+
+        // const result =
+        //     await response.json();
+
+
+        // console.log(
+        //     "result->",
+        //     result
+        // );
+
+const response = await fetch(
+    "/user/order/place",
+    {
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            selectedAddressId,
+            paymentMethod,
+            couponId: appliedCouponId
+        })
+    }
+);
+
+const result = await response.json();
+
+console.log("Place order response:", result);
+
+
+// if (!result.success) {
+
+//     Swal.fire({
+//         icon: "error",
+//         title: "Unable to place order",
+//         text: result.message
+//     });
+
+//     return;
+// }
+
+// window.location.href =
+//     `/user/orders/${result.orderId}`;
+
+        if(result.success){
+
+
+            Swal.fire({
+
+                icon: "success",
+
+                title: "Order Placed!",
+
+                text:
+                    "Your order has been placed successfully."
+
+            }).then(() => {
+
+
+                const url =
+                    "/user/order/success/"
+                    + result.orderId;
+
+
+                window.location.href =
+                    url;
+
+            });
+
+
+        } else {
+
+
+            let html = "";
+
+
+            if(result.products){
+
+                result.products.forEach(
+                    product => {
+
+                        html +=
+                            `• ${product.name}<br>`;
+
+                    }
+                );
+
+            }
+
+
+            if(result.type === "outOfStock"){
+
+                Swal.fire({
+
+                    icon: "error",
+
+                    title: "Out of Stock",
+
+                    html:
+                        html +
+                        "<br>Remove these products from your cart to continue."
+
+                });
+
+            }
+
+
+            else if(result.type === "unavailable"){
+
+                Swal.fire({
+
+                    icon: "warning",
+
+                    title:
+                        "Unavailable Products",
+
+                    html:
+                        html +
+                        "<br>These products are no longer available."
+
+                });
+
+            }
+
+
+            else {
+
+                Swal.fire({
+
+                    icon: "error",
+
+                    title: "Error",
+
+                    text:
+                        result.message
+
+                });
+
+            }
+
+        }
+
+
+    } catch(err){
+
+
+        console.log(err);
+
+
+        Swal.fire({
+
+            icon: "error",
+
+            title:
+                "Something went wrong"
+
+        });
+
+    }
+
+});
+
+
+
+// =====================================================
+// SESSION ALERT
+// =====================================================
+
+const alertData =
+    <%- JSON.stringify(alert || null) %>;
+
+
+if(alertData){
+
+    Swal.fire({
+
+        icon:
+            alertData.type,
+
+        title:
+            alertData.message,
+
+        confirmButtonText:
+            "OK"
+
+    });
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>

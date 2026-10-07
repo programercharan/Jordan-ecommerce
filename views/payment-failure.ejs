@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Payment Failed</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+        rel="stylesheet">
+
+    <style>
+
+        body {
+            background: #f8f9fa;
+        }
+
+        .failure-card {
+            max-width: 550px;
+            margin: 100px auto;
+            border-radius: 20px;
+        }
+
+        .failure-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #dc3545;
+            color: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 40px;
+
+            margin: 0 auto 25px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<!-- NAVBAR -->
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+
+    <div class="container">
+
+        <a class="navbar-brand fw-bold"
+           href="/">
+            JORDAN
+        </a>
+
+
+        <button
+            class="navbar-toggler"
+            data-bs-toggle="collapse"
+            data-bs-target="#navMenu">
+
+            <span class="navbar-toggler-icon"></span>
+
+        </button>
+
+
+        <div class="collapse navbar-collapse"
+             id="navMenu">
+
+            <ul class="navbar-nav ms-auto align-items-center">
+
+                <li class="nav-item me-3">
+
+                    <a class="nav-link"
+                       href="/user/wishlist">
+
+                        <i class="bi bi-heart fs-5"></i>
+
+                    </a>
+
+                </li>
+
+
+                <li class="nav-item me-3">
+
+                    <a class="nav-link"
+                       href="/user/cart">
+
+                        <i class="bi bi-cart3 fs-5"></i>
+
+                    </a>
+
+                </li>
+
+
+                <li class="nav-item">
+
+                    <a class="nav-link"
+                       href="/user/profile">
+
+                        Profile
+
+                    </a>
+
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+<!-- PAYMENT FAILURE -->
+
+<div class="container">
+
+    <div class="card shadow-sm failure-card">
+
+        <div class="card-body text-center p-5">
+
+            <div class="failure-icon">
+
+                <i class="bi bi-x-lg"></i>
+
+            </div>
+
+
+            <h2 class="fw-bold">
+
+                Payment Failed
+
+            </h2>
+
+
+            <p class="text-muted mt-3">
+
+                We couldn't complete your payment.
+                Don't worry, your cart items are still available.
+
+            </p>
+
+
+            <div class="d-flex justify-content-center gap-3 mt-4">
+
+                <button
+                    id="retryPaymentBtn"
+                    class="btn btn-dark px-4">
+
+                    <i class="bi bi-arrow-repeat me-1"></i>
+
+                    Retry Payment
+
+                </button>
+
+
+                <a
+                    href="/user/shop"
+                    class="btn btn-outline-dark px-4">
+
+                    Continue Shopping
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script
+    src="https://checkout.razorpay.com/v1/checkout.js">
+</script>
+
+
+<script
+    src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
+</script>
+
+
+<script>
+
+const retryPaymentBtn =
+    document.getElementById("retryPaymentBtn");
+
+retryPaymentBtn.addEventListener("click", async () => {
+
+    try {
+
+        retryPaymentBtn.disabled = true;
+
+        retryPaymentBtn.innerText =
+            "Opening Payment...";
+
+
+        const response = await fetch(
+            "/user/payment/retry",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+
+        const result = await response.json();
+
+        console.log("Retry response:", result);
+
+
+        if (!result.success) {
+
+            Swal.fire({
+                icon: "error",
+                title: "Unable to Retry Payment",
+                text: result.message
+            });
+
+            retryPaymentBtn.disabled = false;
+
+            retryPaymentBtn.innerText =
+                "Retry Payment";
+
+            return;
+        }
+
+
+        const razorpayOrder =
+            result.razorpayOrder;
+
+
+        // Prevent multiple redirects
+        let paymentCompleted = false;
+        let redirecting = false;
+
+
+        const goToFailurePage = async () => {
+
+            if (redirecting) {
+                return;
+            }
+
+            redirecting = true;
+
+            console.log(
+                "➡️ Redirecting to payment failure page"
+            );
+
+            try {
+
+                await fetch(
+                    "/user/payment/failed",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    }
+                );
+
+            } catch (error) {
+
+                console.log(
+                    "Failed to set payment failure session:",
+                    error
+                );
+
+            }
+
+            window.location.href =
+                "/user/payment/failure";
+        };
+
+
+        const options = {
+
+            key: "<%= razorpayKeyId %>",
+
+            amount: razorpayOrder.amount,
+
+            currency: razorpayOrder.currency,
+
+            name: "JORDAN SHOES",
+
+            description: "Retry Payment",
+
+            order_id: razorpayOrder.id,
+
+
+            handler: async function(paymentResponse) {
+
+                paymentCompleted = true;
+
+                console.log(
+                    "✅ Retry payment successful"
+                );
+
+
+                try {
+
+                    const verifyResponse =
+                        await fetch(
+                            "/user/payment/verify",
+                            {
+
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body: JSON.stringify({
+
+                                    razorpay_order_id:
+                                        paymentResponse
+                                            .razorpay_order_id,
+
+                                    razorpay_payment_id:
+                                        paymentResponse
+                                            .razorpay_payment_id,
+
+                                    razorpay_signature:
+                                        paymentResponse
+                                            .razorpay_signature
+
+                                })
+                            }
+                        );
+
+
+                    const verifyResult =
+                        await verifyResponse.json();
+
+
+                    console.log(
+                        "Verification result:",
+                        verifyResult
+                    );
+
+
+                    if (verifyResult.success) {
+
+                        console.log(
+                            "✅ VERIFY SUCCESS → ORDER SUCCESS"
+                        );
+
+                        window.location.href =
+                            "/user/order/success/" +
+                            verifyResult.orderId;
+
+                        return;
+
+                    }
+
+
+                    console.log(
+                        "❌ VERIFY FAILED → FAILURE PAGE"
+                    );
+
+                    await goToFailurePage();
+
+                } catch (error) {
+
+                    console.log(
+                        "Verification error:",
+                        error
+                    );
+
+                    await goToFailurePage();
+
+                }
+
+            },
+
+
+            modal: {
+
+                ondismiss: async function() {
+
+                    console.log(
+                        "⚠️ Razorpay popup dismissed"
+                    );
+
+
+                    // If payment already succeeded,
+                    // don't redirect to failure.
+                    if (paymentCompleted) {
+                        return;
+                    }
+
+
+                    await goToFailurePage();
+
+                }
+
+            }
+
+        };
+
+
+        const razorpay =
+            new Razorpay(options);
+
+
+        razorpay.on(
+            "payment.failed",
+            async function(response) {
+
+                console.log(
+                    "❌ RAZORPAY PAYMENT FAILED"
+                );
+
+                console.log(
+                    "Error:",
+                    response.error
+                );
+
+
+                if (paymentCompleted) {
+                    return;
+                }
+
+
+                await goToFailurePage();
+
+            }
+        );
+
+
+        razorpay.open();
+
+
+        console.log(
+            "🔥 RAZORPAY OPEN CALLED"
+        );
+
+
+    } catch(error) {
+
+        console.log(
+            "Retry payment error:",
+            error
+        );
+
+
+        Swal.fire({
+            icon: "error",
+            title: "Something went wrong",
+            text: error.message
+        });
+
+
+        retryPaymentBtn.disabled = false;
+
+        retryPaymentBtn.innerText =
+            "Retry Payment";
+
+    }
+
+});
+
+</script>
+
+
+</body>
+
+</html>

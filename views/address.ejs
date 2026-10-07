@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Addresses</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+  <style>
+    body {
+      background-color: #f5f5f5;
+    }
+
+    .sidebar {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 10px;
+      color: #333;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-bottom: 5px;
+    }
+
+    .sidebar a.active {
+      background-color: #0d6efd;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .address-card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    .address-actions {
+      margin-top: 10px;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+
+        <a class="navbar-brand fw-bold" href="/user/home">
+            JORDAN
+        </a>
+
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav">
+
+            <span class="navbar-toggler-icon"></span>
+
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+
+            <ul class="navbar-nav">
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/home">Home</a>
+                </li>
+ <li class="nav-item">
+
+    <a
+        class="nav-link position-relative"
+        href="/user/wishlist"
+    >
+
+        <i class="bi bi-heart fs-5"></i>
+
+        <% if (wishlistCount > 0) { %>
+
+            <span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+            >
+
+                <%= wishlistCount %>
+
+            </span>
+
+        <% } %>
+
+    </a>
+
+</li>
+<li class="nav-item">
+    <a class="nav-link position-relative" href="/user/cart">
+        <i class="bi bi-cart3 fs-5"></i>
+        
+        <% if (locals.cartCount && cartCount > 0) { %>
+            <span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+            >
+                <%= cartCount %>
+            </span>
+        <% } %>
+    </a>
+</li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/profile">Profile</a>
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+</nav>
+
+<div class="container mt-5">
+  <div class="row">
+
+    <!-- Sidebar -->
+    <div class="col-md-3">
+      <div class="sidebar">
+        <h5>My Account</h5>
+
+        <a href="/user/profile" 
+           class="<%= currentPage === 'profile' ? 'active' : '' %>">
+           Profile
+        </a>
+
+        <a href="/user/address" 
+           class="<%= currentPage === 'address' ? 'active' : '' %>">
+           Address
+        </a>
+
+        <a href="/user/orders" 
+           class="<%= currentPage === 'orders' ? 'active' : '' %>">
+           Orders
+        </a>
+
+        <a href="/user/wishlist" 
+           class="<%= currentPage === 'wishlist' ? 'active' : '' %>">
+           Wishlist
+        </a>
+
+        <a href="/user/wallet" 
+           class="<%= currentPage === 'wallet' ? 'active' : '' %>">
+           My Wallet
+        </a>
+
+        <a href="/user/logout" class="text-danger fw-bold">
+            Logout
+         </a>
+      </div>
+    </div>
+
+    <!-- Address Section -->
+    <div class="col-md-9">
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>My Addresses</h4>
+        <a href="/user/addaddress" class="btn btn-primary">+ Add Address</a>
+      </div>
+
+      <!-- If no address -->
+      <% if(addresses.length === 0){ %>
+        <div class="alert alert-info">
+          No addresses found. Please add one.
+        </div>
+      <% } %>
+
+      <!-- Address List -->
+      <% addresses.forEach(address => { %>
+        <div class="address-card">
+
+          <p><strong>Address:</strong> <%= address.address %></p>
+          <p><strong>City:</strong> <%= address.city %></p>
+          <p><strong>State:</strong> <%= address.state %></p>
+          <p><strong>Pincode:</strong> <%= address.pincode %></p>
+          <p><strong>Phone Number:</strong> <%= address.phoneNumber %></p>
+
+          <div class="address-actions">
+            <a href="/user/editAddress/<%= address._id %>" 
+               class="btn btn-sm btn-outline-primary">
+               Edit
+            </a>
+
+            <form action="/user/deleteAddress/<%= address._id %>" 
+                  method="POST" 
+                  style="display:inline;">
+              <button type="submit" 
+                      class="btn btn-sm btn-outline-danger">
+                Delete
+              </button>
+            </form>
+          </div>
+
+        </div>
+      <% }) %>
+
+    </div>
+
+  </div>
+</div>
+<script>
+const alertData = <%- JSON.stringify(alert || null) %>;
+
+if (alertData) {
+  Swal.fire({
+    icon: alertData.type,
+    title: alertData.message,
+    confirmButtonText: "OK"
+  });
+}
+</script>
+</body>
+</html>

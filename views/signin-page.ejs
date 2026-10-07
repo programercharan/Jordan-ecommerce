@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JORDAN – Signup</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body class="bg-light d-flex flex-column justify-content-center align-items-center vh-100">
+
+    <!-- Logo + tagline above the card -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">JORDAN</h2>
+        <p class="text-muted small">Crafted for Comfort and Style</p>
+    </div>
+
+    <!-- Card -->
+    <div class="card shadow p-4" style="width: 380px;">
+    <h5 class="fw-semibold mt-2 mb-3">Sign In</h5>
+
+    <% if(error) { %>
+        <div class="alert alert-danger">
+            <%= error %>
+        </div>
+    <% } %>
+
+    <form id="signupForm" action="/user/login" method="post" novalidate>
+
+        <small id="credentialsError" class="text-danger"></small>
+
+        <!-- Email -->
+        <div class="mb-3">
+            <input type="email" class="form-control" id="email" name="email" placeholder="Email">
+            <small id="emailError" class="text-danger"></small>
+        </div>
+
+        <!-- Password -->
+        <div class="mb-3 position-relative">
+            <div class="position-relative">
+                <input type="password" class="form-control pe-5" id="password" name="password" placeholder="Password">
+                <i class="bi bi-eye-slash position-absolute end-0 top-50 translate-middle-y me-3 fs-5"
+                   id="togglePassword" style="cursor:pointer; color: #6c757d;"></i>
+            </div>
+
+            <div style="min-height: 1em;">
+                <small id="passwordError" class="text-danger"></small>
+            </div>
+
+            <div class="text-end mt-1">
+                <a href="/user/forgotpassword" class="small text-decoration-none">Forgot password?</a>
+            </div>
+        </div>
+
+        <!-- Sign In -->
+        <div class="d-grid mb-2">
+            <button type="submit" class="btn btn-dark">Sign In</button>
+        </div>
+
+        <!-- Google sign in (just below submit) -->
+        <div class="d-grid mb-3">
+            <a href="/user/google" class="btn btn-danger">
+                Sign in with Google
+            </a>
+        </div>
+
+        <div class="d-grid mb-3">
+            <a href="/user/auth/google" class="btn btn-danger">
+                Sign in with Facebook
+            </a>
+        </div>
+
+        <!-- Signup text inside the same box -->
+        <div class="text-center mt-2">
+            <div class="text-muted small">Don’t have an account?</div>
+            <a href="/user/signup" class="fw-bold fs-5 text-decoration-underline">
+                Sign up
+            </a>
+        </div>
+
+    </form>
+</div>
+
+    <script>
+
+        const emailError = document.getElementById("emailError")
+        const passwordError = document.getElementById("passwordError")
+        const credentialsError = document.getElementById("credentialsError");
+
+        const emailRegex = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+        const email = document.getElementById("email")
+        email.addEventListener("keyup", (e) => {
+            const emailInputValue = document.getElementById("email").value.trim()
+            if (emailRegex.test(emailInputValue))
+                emailError.innerText = ""
+        })
+        const password = document.getElementById("password")
+        password.addEventListener("keyup", (e) => {
+            const passwordInputValue = document.getElementById("password").value.trim()
+            if (passwordRegex.test(passwordInputValue)) {
+                passwordError.innerText = ""
+            }
+        })
+
+
+        const form = document.getElementById("signupForm")
+        form.addEventListener("submit", (e) => {
+            e.preventDefault()
+            let hasError = false
+            console.log("is this executed??")
+
+            const emailInputValue = document.getElementById("email").value.trim()
+            const passwordInputValue = document.getElementById("password").value.trim()
+
+            emailError.innerText = ""
+            passwordError.innerText = ""
+            credentialsError.innerText = ""
+
+
+            if (emailInputValue === "" && passwordInputValue === "") {
+                console.log(emailInputValue)
+                console.log(passwordInputValue)
+                credentialsError.innerText = "All fields are required";
+                hasError = true;
+            }
+            else if (emailInputValue === "") {
+                emailError.innerText = "Enter Email"
+                hasError = true;
+            }
+            else if (passwordInputValue === "") {
+                passwordError.innerText = "Enter Password"
+                hasError = true;
+            }
+            else if (!emailRegex.test(emailInputValue)) {
+                emailError.innerText = "Enter valid Email"
+                hasError = true;
+            }
+            else if (!passwordRegex.test(passwordInputValue)) {
+                passwordError.innerText = "Password is Invalid";
+                hasError = true;
+            }
+            if (hasError === false) {
+                form.submit()
+            }
+        })
+
+        const eye = document.getElementById("togglePassword")
+        const passwordInput = document.getElementById("password")
+
+        eye.addEventListener("click", () => {
+            let type = passwordInput.getAttribute("type")
+
+            if (type === "password") {
+                type = "text"
+                eye.classList.remove("bi-eye-slash")
+                eye.classList.add("bi-eye")
+            }
+            else {
+                type = "password"
+                eye.classList.remove("bi-eye")
+                eye.classList.add("bi-eye-slash")
+            }
+
+            passwordInput.setAttribute("type", type)
+        })
+    </script>
+    <script>
+        
+const alertData = <%- JSON.stringify(alert || null) %>;
+
+console.log(alertData)
+if (alertData) {
+  Swal.fire({
+    icon: alertData.type,
+    title: alertData.message,
+    confirmButtonText: "OK"
+  }).then(()=>{
+    if(alertData.redirect){
+      window.location.href=alertData.redirect
+    }
+  })
+}
+    </script>
+    
+       <% if(success==="passwordUpdated") { %>
+<script>
+Swal.fire({
+    icon: "success",
+    title: "Password Updated Successfully. Login Again.",
+    confirmButtonText: "OK"
+}).then(()=>{
+    window.history.replaceState({}, document.title, "/user/login");
+});
+</script>
+<% } %>
+
+
+
+    </body>  
+    </html>
