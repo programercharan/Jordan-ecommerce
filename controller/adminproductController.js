@@ -28,7 +28,7 @@ export const getAddProductPage =async(req,res)=>{
     console.log("rendering the add product page")
     const categories =await getCategoriesForProduct()
 
-    res.render("admin-addProduct",{categories,currentSideBar:"products"})
+    res.render("admin-addproduct",{categories,currentSideBar:"products"})
 
 }
 
