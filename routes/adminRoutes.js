@@ -28,7 +28,7 @@ Router.get("/productVariant/:id",Checksession,productVarientPage)
 
 // Router.post("/addProductVarient",Checksession, variantUpload.array("images", 4),saveProductVariantController)
 Router.post(
-    "/addProductVarient",
+    "/addproductVariant",
 
     (req, res, next) => {
         console.log("1. VARIANT ROUTE REACHED");
