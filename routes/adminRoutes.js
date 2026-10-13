@@ -26,7 +26,37 @@ Router.get("/productVariant/:id",Checksession,productVarientPage)
 
 
 
-Router.post("/addProductVarient",Checksession, variantUpload.array("images", 4),saveProductVariantController)
+// Router.post("/addProductVarient",Checksession, variantUpload.array("images", 4),saveProductVariantController)
+Router.post(
+    "/addProductVarient",
+
+    (req, res, next) => {
+        console.log("1. VARIANT ROUTE REACHED");
+        next();
+    },
+
+    Checksession,
+
+    (req, res, next) => {
+        console.log("2. CHECKSESSION PASSED");
+        next();
+    },
+
+    variantUpload.array("images", 4),
+
+    (req, res, next) => {
+        console.log("3. MULTER COMPLETED");
+        console.log("FILES COUNT:", req.files?.length);
+        console.log(
+            "FILE SIZES:",
+            req.files?.map(file => file.size)
+        );
+        next();
+    },
+
+    saveProductVariantController
+);
+
 Router.get("/editExistingProductVarient/:id",Checksession,editProductVariantPage);
 Router.post("/editExistingProductVarient/:id",Checksession, variantUpload.array("images", 4),updateProductVariantController);
 Router.post("/activateExistingProductVarient/:id",Checksession,activateProductVariantController);
