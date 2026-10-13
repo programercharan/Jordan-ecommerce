@@ -950,6 +950,7 @@ src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.j
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
+
 <script>
 
 const addressForm =
@@ -1254,8 +1255,7 @@ couponButtons.forEach(button => {
     button.addEventListener("click", async () => {
 
 
-        const couponId =
-            button.dataset.couponId;
+        const couponId = button.dataset.couponId;
 
 
         // =============================================
@@ -1594,6 +1594,7 @@ document
 
         if(paymentMethod === "Razorpay"){
 
+            console.log()
 
             console.log(
                 "Razorpay selected"

@@ -218,16 +218,23 @@ export const editProductVariantPage = async (req,res)=>{
         console.log("executing editProductVariant")
         const varaintId=req.params.id
         const result=await editProductVariantPageServices(varaintId)
-
+        console.log(result.success)
         if(result.success){
         res.render("admin-editVariant",{product:result.product,variant:result.variant,currentSideBar:"variant",errorMsg:null});
+         }
+        else{
+            req.session.alert={
+                type:"error",
+                message:"cannot edit variant ,try again later"
+            }
+            return res.redirect("/admin/product/products")
         }
 
     }catch(error){
 
         console.log(error);
 
-        res.redirect("/admin/products");
+        res.redirect("/admin/product/products");
 
     }
 

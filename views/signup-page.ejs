@@ -134,155 +134,156 @@
 
 
 <script>
-console.log("script tag started executing")
-const form =
-    document.getElementById("signupForm");
-console.log(form)
-const passwordInput =
-    document.getElementById("password");
+const form = document.getElementById("signupForm");
 
+const firstNameInput = document.getElementById("firstName");
+const lastNameInput = document.getElementById("lastName");
+const emailInput = document.getElementById("email");
+const phoneInput = document.getElementById("phoneNumber");
+const referralCodeInput = document.getElementById("referralCode");
+const passwordInput = document.getElementById("password");
+const confirmPasswordInput = document.getElementById("confirmPassword");
 
-const confirmPasswordInput =
-    document.getElementById("confirmPassword");
-
+// Error message elements
+const credentialsError = document.getElementById("credentialsError");
+const firstNameError = document.getElementById("firstNameError");
+const lastNameError = document.getElementById("lastNameError");
+const emailError = document.getElementById("emailError");
+const phoneError = document.getElementById("phoneError");
 const passwordError = document.getElementById("passwordError");
+const confirmPasswordError = document.getElementById("confirmPasswordError");
 
-
- const confirmPasswordError = document.getElementById("confirmPasswordError");
-
+// Password visibility buttons
 const togglePassword = document.getElementById("togglePassword");
+const toggleConfirmPassword = document.getElementById("toggleConfirmPassword");
 
-const toggleConfirmPassword =
-    document.getElementById("toggleConfirmPassword");
+// Show/hide password
+togglePassword.addEventListener("click", () => {
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        togglePassword.classList.replace("bi-eye-slash", "bi-eye");
+    } else {
+        passwordInput.type = "password";
+        togglePassword.classList.replace("bi-eye", "bi-eye-slash");
+    }
+});
 
-console.log("validation executing")
-// ==================================================
-// PASSWORD VALIDATION
-// ==================================================
+toggleConfirmPassword.addEventListener("click", () => {
+    if (confirmPasswordInput.type === "password") {
+        confirmPasswordInput.type = "text";
+        toggleConfirmPassword.classList.replace("bi-eye-slash", "bi-eye");
+    } else {
+        confirmPasswordInput.type = "password";
+        toggleConfirmPassword.classList.replace("bi-eye", "bi-eye-slash");
+    }
+});
 
 form.addEventListener("submit", (e) => {
-console.log("can. be seen only after clicking the submit event")
     e.preventDefault();
-    console.log("event listener started");
+
     let hasError = false;
 
+    // Get field values
+    const firstName = firstNameInput.value.trim();
+    const lastName = lastNameInput.value.trim();
+    const email = emailInput.value.trim();
+    const phone = phoneInput.value.trim();
+    const referralCode = referralCodeInput.value.trim();
+    const password = passwordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
 
-    const password =
-        passwordInput.value.trim();
-
-    const confirmPassword =
-        confirmPasswordInput.value.trim();
-
-
-    // Clear previous errors
-
+    // Clear previous error messages
+    credentialsError.innerText = "";
+    firstNameError.innerText = "";
+    lastNameError.innerText = "";
+    emailError.innerText = "";
+    phoneError.innerText = "";
     passwordError.innerText = "";
-
     confirmPasswordError.innerText = "";
 
-
-    // ==================================================
-    // PASSWORD CHECK
-    // ==================================================
-
-    if (password === "") {
-
-        passwordError.innerText =
-            "Enter password";
-
+    // FIRST NAME
+    if (firstName === "") {
+        firstNameError.innerText = "Enter first name";
         hasError = true;
+    } else if (!/^[a-zA-Z]+(?:[ '-][a-zA-Z]+)*$/.test(firstName)) {
+        firstNameError.innerText = "Enter a valid first name";
+        hasError = true;
+    }
 
+    // LAST NAME
+    if (lastName === "") {
+        lastNameError.innerText = "Enter last name";
+        hasError = true;
+    } else if (!/^[a-zA-Z]+(?:[ '-][a-zA-Z]+)*$/.test(lastName)) {
+        lastNameError.innerText = "Enter a valid last name";
+        hasError = true;
+    }
+
+    // EMAIL
+    if (email === "") {
+        emailError.innerText = "Enter email address";
+        hasError = true;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        emailError.innerText = "Enter a valid email address";
+        hasError = true;
+    }
+
+    // PHONE NUMBER
+    if (phone === "") {
+        phoneError.innerText = "Enter phone number";
+        hasError = true;
+    } else if (!/^[6-9]\d{9}$/.test(phone)) {
+        phoneError.innerText = "Enter a valid 10-digit Indian mobile number";
+        hasError = true;
+    }
+
+    // PASSWORD
+    if (password.trim() === "") {
+        passwordError.innerText = "Enter password";
+        hasError = true;
     } else {
-
         const checks = {
-
-            length:
-                password.length >= 8,
-
-            lowercase:
-                /[a-z]/.test(password),
-
-            uppercase:
-                /[A-Z]/.test(password),
-
-            number:
-                /\d/.test(password),
-
-            specialChar:
-                /[@$!%*?&]/.test(password)
-
+            length: password.length >= 8,
+            lowercase: /[a-z]/.test(password),
+            uppercase: /[A-Z]/.test(password),
+            number: /\d/.test(password),
+            specialChar: /[@$!%*?&]/.test(password)
         };
 
-
-        const errorMsg = {
-
-            length:
-                "Password must contain at least 8 characters.<br>",
-
-            lowercase:
-                "Password must contain a lowercase letter.<br>",
-
-            uppercase:
-                "Password must contain an uppercase letter.<br>",
-
-            number:
-                "Password must contain a number.<br>",
-
-            specialChar:
-                "Password must contain a special character (@$!%*?&).<br>"
-
+        const errorMessages = {
+            length: "Password must contain at least 8 characters.",
+            lowercase: "Password must contain a lowercase letter.",
+            uppercase: "Password must contain an uppercase letter.",
+            number: "Password must contain a number.",
+            specialChar: "Password must contain a special character (@$!%*?&)."
         };
 
-
-        Object.entries(checks).forEach(([key, value]) => {
-
-            if (!value) {
-
+        Object.entries(checks).forEach(([key, isValid]) => {
+            if (!isValid) {
+                passwordError.innerHTML += errorMessages[key] + "<br>";
                 hasError = true;
-
-                passwordError.innerHTML +=
-                    errorMsg[key];
-
             }
-
         });
-
     }
 
-
-    // ==================================================
-    // CONFIRM PASSWORD CHECK
-    // ==================================================
-
+    // CONFIRM PASSWORD
     if (confirmPassword === "") {
-
-        confirmPasswordError.innerText =
-            "Enter confirm password";
-
+        confirmPasswordError.innerText = "Enter confirm password";
         hasError = true;
-
-    }
-
-    else if (password !== confirmPassword) {
-
+    } else if (password !== confirmPassword) {
         confirmPasswordError.innerText =
             "Confirm password doesn't match the password";
-
         hasError = true;
-
     }
 
+    // REFERRAL CODE IS OPTIONAL
+    // No validation is required unless a referral code is entered.
+    // The backend should verify whether the code is valid.
 
-    // ==================================================
-    // SUBMIT
-    // ==================================================
-
+    // SUBMIT FORM
     if (!hasError) {
-
         form.submit();
-
     }
-
 });
 
 

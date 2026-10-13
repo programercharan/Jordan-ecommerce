@@ -20,7 +20,7 @@ import errorHandler from "./middleware/erroHandler.js";
 import { wishlistCount } from "./middleware/wishlistMiddleware.js";
 import { cartCount } from "./middleware/cartMiddleware.js"
 import { userEmail,locals,cachey,sessionMiddleware } from "./middleware/localsMiddleware.js";
-
+import rootRouter from "./routes/rootRoutes.js"
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -39,7 +39,7 @@ app.use(cachey);
 
 app.use(locals);
 
-connect();
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -50,6 +50,7 @@ app.use(userEmail)
 createAdmin()
 app.use(wishlistCount)
 app.use(cartCount)
+app.use("/", rootRouter);
 app.use("/user", blockCheckMiddleware, userRouter);
 app.use("/admin",adminRouter)
 app.use("/admin/product", adminProductRouter);
@@ -57,7 +58,20 @@ app.use("/admin/category", adminCategoryRouter);
 
 
 app.use(errorHandler);
+
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log("server is listening", PORT);
-});
+
+async function startServer() {
+    try {
+        await connect();
+
+        app.listen(PORT, () => {
+            console.log("server is listening", PORT);
+        });
+    } catch (error) {
+        console.error("Failed to start server:", error.message);
+        process.exit(1);
+    }
+}
+
+startServer()

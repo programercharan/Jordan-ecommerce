@@ -2026,7 +2026,7 @@ export const checkoutPageServices = async (userId) => {
             });
 
 
-        console.log(coupons)
+        console.log("coupons for this user->",coupons)
         return {
 
             cart,
@@ -4575,10 +4575,11 @@ export const removeCouponService = async (userId) => {
 
         // NO COUPON
 
-        const grandTotal =
-            Math.round(
-                subtotal * 100
-            ) / 100;
+const shipping = 50;
+
+const grandTotal = Math.round(
+  (subtotal + shipping) * 100
+) / 100;
 
 
         return {

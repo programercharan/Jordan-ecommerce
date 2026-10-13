@@ -879,6 +879,7 @@ export const checkoutPage = async (req, res) => {
   }
   const userId = req.session.userId
   const result = await checkoutPageServices(userId)
+  delete req.session.couponId;
   // console.log(result)
   if (result) {
     result.razorpayKeyId = process.env.RAZORPAY_KEY_ID
@@ -2152,7 +2153,7 @@ export const createRazorpayOrderController = async (req, res) => {
     console.log("create order controller executing");
 
     const userId = req.session.userId;
-
+console.log("Coupon ID in session:", req.session.couponId);
     const { selectedAddressId, paymentMethod } = req.body;
 
     // Coupon stored when user clicked Apply
@@ -2160,6 +2161,9 @@ export const createRazorpayOrderController = async (req, res) => {
 
     const result = await createRazorpayOrderService(userId, couponId);
 
+console.log("Grand total from service:", result.grandTotal);
+console.log("Coupon discount from service:", result.couponDiscount);
+console.log("Razorpay amount in rupees:", result.razorpayOrder?.amount / 100);
     if (!result.success) {
       req.session.paymentFailurePage = true;
       return res.json(result);
@@ -2419,15 +2423,27 @@ export const removeCoupon = async (req, res) => {
 
     }
 
-    // Remove applied coupon from session
-    req.session.couponId = null;
 
-    return res.json({
-      success: true,
-      message: "Coupon removed successfully",
-      couponDiscount: 0,
-      grandTotal: result.grandTotal
+// Remove applied coupon from session
+req.session.couponId = null;
+
+req.session.save((error) => {
+  if (error) {
+    console.log("Session save error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to remove coupon from session"
     });
+  }
+
+  return res.json({
+    success: true,
+    message: "Coupon removed successfully",
+    couponDiscount: 0,
+    grandTotal: result.grandTotal
+  });
+});
 
   } catch (error) {
 
@@ -2674,4 +2690,8 @@ export const returnAllOrderItemController = async (req, res) => {
       message: "Something went wrong. Please try again later"
     });
   }
+};
+
+export const redirectToLoginController = (req, res) => {
+    return res.redirect("/user/login");
 };

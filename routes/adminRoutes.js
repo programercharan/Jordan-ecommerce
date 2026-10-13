@@ -1,5 +1,6 @@
 import express from "express"
 import upload from "../config/multer.js";
+import variantUpload from "../middleware/variantUpload.js"
 
 const Router = express.Router()
  import{adminLoginPage,loginAdmin,adminDashboard,blockUser,unblockUser,addProductVariantPage,adminCouponsController,
@@ -25,9 +26,9 @@ Router.get("/productVariant/:id",Checksession,productVarientPage)
 
 
 
-Router.post("/addProductVarient",Checksession, upload.array("images",4),saveProductVariantController)
+Router.post("/addProductVarient",Checksession, variantUpload.array("images", 4),saveProductVariantController)
 Router.get("/editExistingProductVarient/:id",Checksession,editProductVariantPage);
-Router.post("/editExistingProductVarient/:id",Checksession, upload.array("images",4),updateProductVariantController);
+Router.post("/editExistingProductVarient/:id",Checksession, variantUpload.array("images", 4),updateProductVariantController);
 Router.post("/activateExistingProductVarient/:id",Checksession,activateProductVariantController);
 Router.post("/deactivateExistingProductVarient/:id",Checksession,deactivateProductVariantController);
 

@@ -9,6 +9,7 @@ import Offer from "../models/offer.model.js"
 import Wallet from "../models/wallet.model.js"
 import PDFDocument from "pdfkit";
 import ExcelJS from "exceljs";
+import compressAndUploadImage from "./imageUploadService.js"
 
 export const loginServices = async (email, password) => {
     console.log("admin login verifying")
@@ -227,11 +228,23 @@ export const saveProductVariantService = async (body, files) => {
 
     }
 
-    // const imageUrls =files.map(file =>{
-    // console.log("☁️ Cloudinary file:", file.path)
-    // file.path
-    // })
-    const imageUrls = files.map(file => file.path || file.secure_url)
+
+    const uploadedImages = await Promise.all(
+    files.map(file => compressAndUploadImage(file))
+    );
+
+    const imageUrls = uploadedImages.map(image => image.url);
+
+    console.log(
+    "IMAGE COMPRESSION RESULTS:",
+    uploadedImages.map(image => ({
+        originalSize: image.originalSize,
+        compressedSize: image.compressedSize,
+        width: image.width,
+        height: image.height
+    }))
+    );
+
     console.log("🖼 FINAL IMAGE URLS:", imageUrls)
     console.log("checking weather the list is ")
     const saved = await ProductVariant.create({ productId, list, color, regularPrice, salePrice, sizeAndStock, images: imageUrls });
@@ -281,24 +294,62 @@ export const updateProductVariantService = async (variantId, body, files) => {
             stock: Number(stocks[i])
         });
     }
-    let existingImages = body.existingImages;
+    // let existingImages = body.existingImages;
 
-    if (!existingImages) {
-        existingImages = [];
-    }
+    // if (!existingImages) {
+    //     existingImages = [];
+    // }
 
-    if (!Array.isArray(existingImages)) {
-        existingImages = [existingImages];
-    }
+    // if (!Array.isArray(existingImages)) {
+    //     existingImages = [existingImages];
+    // }
 
-    let newImages = [];
+    // let newImages = [];
 
-    if (files && files.length > 0) {
-        newImages = files.map(file => file.path);
-    }
+    // if (files && files.length > 0) {
+    //     newImages = files.map(file => file.path);
+    // }
 
-    const imageUrls = [...existingImages, ...newImages];
+    // const imageUrls = [...existingImages, ...newImages];
 
+
+let existingImages = body.existingImages;
+
+if (!existingImages) {
+    existingImages = [];
+}
+
+if (!Array.isArray(existingImages)) {
+    existingImages = [existingImages];
+}
+
+// Compress and upload only newly added images.
+let newImages = [];
+
+if (files && files.length > 0) {
+    const uploadedImages = await Promise.all(
+        files.map(file => compressAndUploadImage(file))
+    );
+
+    newImages = uploadedImages.map(image => image.url);
+}
+
+// Retain existing images and append newly uploaded images.
+const imageUrls = [...existingImages, ...newImages];
+
+if (imageUrls.length === 0) {
+    return {
+        success: false,
+        message: "At least one image is required"
+    };
+}
+
+if (imageUrls.length > 4) {
+    return {
+        success: false,
+        message: "A maximum of 4 images is allowed"
+    };
+}
 
     // if (imageUrls.length === 0) {
     //     return {
@@ -4985,19 +5036,33 @@ if(product){
 
 
  export const editProductVariantPageServices=async(varaintId)=>{
+const variant = await ProductVariant.findById(varaintId);
 
-        const variant =await ProductVariant.findById(varaintId);
-        const product =await Product.findById(variant.productId);
-        if(variant&product){
-            return{
-                success:true,
-                variant,
-                product
-            }
-        }
-        else{
-            return {success:false}
-        }
+if (!variant) {
+    return {
+        success: false,
+        message: "Variant not found"
+    };
+}
+
+const product = await Product.findById(variant.productId);
+
+// console.log("variant ->", variant);
+// console.log("product ->", product);
+
+if (variant && product) {
+    return {
+        success: true,
+        variant,
+        product
+    };
+}
+
+return {
+    success: false,
+    message: "Product not found"
+};
+
 
 }
 
