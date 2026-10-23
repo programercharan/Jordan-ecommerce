@@ -584,6 +584,7 @@ export const fetchAllProducts = async () => {
     return { success: true }
 }
 
+
 export const getAllProductsPageService = async ({
     search,
     sort,
@@ -591,353 +592,478 @@ export const getAllProductsPageService = async ({
     category,
     brand,
     color,
-    price, userId, minPrice, maxPrice
+    price,
+    userId,
+    minPrice,
+    maxPrice
 }) => {
-    console.log("brand->", brand)
-    console.log("getProductsPageService executing...")
+    const limit = 10;
+    const currentPage = Math.max(1, Number(page) || 1);
+    const skip = (currentPage - 1) * limit;
+
+    // -----------------------------------------
+    // STEP 1: PREPARE PRICE FILTERS
+    // -----------------------------------------
 
     if (price === "gt5000") {
         price = { $gt: 5000 };
-    }
-
-    if (price === "gt3000") {
+    } else if (price === "gt3000") {
         price = { $gt: 3000 };
-    }
-
-    if (price === "lt5000") {
+    } else if (price === "lt5000") {
         price = { $lt: 5000 };
-    }
-
-    if (price === "lt3000") {
+    } else if (price === "lt3000") {
         price = { $lt: 3000 };
     }
 
+    const priceFilter = {};
 
+    if (minPrice !== undefined && minPrice !== "") {
+        priceFilter.$gte = Number(minPrice);
+    }
 
+    if (maxPrice !== undefined && maxPrice !== "") {
+        priceFilter.$lte = Number(maxPrice);
+    }
 
-    const limit = 10;
-    const skip = (page - 1) * limit;
-    // console.log("the page->",page)
-    // console.log("skip->",skip)
-    let multipleCategory = false
-    let cat;
-    let splitedCategory;
-    let multipleCat = []
-    let multiplePrd = []
+    // -----------------------------------------
+    // STEP 2: FETCH SELECTED CATEGORIES
+    // -----------------------------------------
+
+    let selectedCategories = [];
+    let multipleCategory = false;
+    let cat = null;
 
     if (category) {
-        splitedCategory = category.split(",")
-    }
+        const categoryNames = category.split(",").filter(Boolean);
 
-    if (splitedCategory && splitedCategory.length > 1) {
+        multipleCategory = categoryNames.length > 1;
 
-        multipleCategory = true
-        for (let eachCat of splitedCategory) {
-            const categ = await Category.findOne({ categoryName: eachCat, list: true })
-            multipleCat.push(categ)
-        }
-    } else {
-        let categorySearchQuery = { list: true }
-        if (category) {
-            categorySearchQuery.categoryName = { $regex: category, $options: "i" }
-
-            console.log("Name of the category user selected->", category)
-            console.log(categorySearchQuery)
-            cat = await Category.findOne(categorySearchQuery)
-            // console.log("fetched categories->",cat)
-        }
-    }
-
-    let searchQuery;
-
-    let productSearchQuery = { list: true }
-
-    let products;
-    if (cat) {
-        console.log("fetching product when filter has category is ")
-        // if(search)
-        // { searchQuery={categoryId:cat._id,list:true, "$or":[{name:{$regex:search,$options:"i" },},{brand:{$regex:search,$options:"i"}}]}   
-        if (brand && search) {
-            productSearchQuery.categoryId = cat._id,
-                productSearchQuery.brand = brand,
-                productSearchQuery.$or = [{
-                    name: { $regex: search, $options: "i" }
-                }]
-
-        } else if (brand) {
-            productSearchQuery.categoryId = cat._id,
-                productSearchQuery.brand = brand
-        } else if (search) {
-            productSearchQuery.categoryId = cat._id,
-                productSearchQuery.$or = [
-                    {
-                        name: { $regex: search, $options: "i" }
-                    },
-
-                    {
-                        search: { $regex: search, $options: "i" }
-                    }
-                ]
+        if (multipleCategory) {
+            selectedCategories = await Category.find({
+                categoryName: { $in: categoryNames },
+                list: true
+            }).select("_id categoryName");
         } else {
-            productSearchQuery.categoryId = cat._id
-        }
-        console.log("category exist and productSearchQuery->", productSearchQuery)
-        products = await Product.find(productSearchQuery)
-
-    }
-
-    else if (multipleCategory) {
-        if (brand && search) {
-            productSearchQuery.brand = brand,
-                productSearchQuery.$or = [{
-                    name: { $regex: search, $options: "i" }
-                }]
-
-        } else if (brand) {
-            productSearchQuery.brand = brand
-        } else if (search) {
-            productSearchQuery.$or = [
-                {
-                    name: { $regex: search, $options: "i" }
+            cat = await Category.findOne({
+                categoryName: {
+                    $regex: categoryNames[0],
+                    $options: "i"
                 },
+                list: true
+            }).select("_id categoryName");
 
-                {
-                    search: { $regex: search, $options: "i" }
-                }
-            ]
-        }
-
-        for (let eachCatToFetchPrd of multipleCat) {
-            let prod = await Product.find({ categoryId: eachCatToFetchPrd._id, ...productSearchQuery })
-            // multiplePrd.push([].concat(...prod))
-            multiplePrd = multiplePrd.concat(...prod)
-        }
-        console.log(multiplePrd)
-
-    }
-
-    else {
-
-        if (brand && search) {
-            productSearchQuery.brand = brand,
-                productSearchQuery.$or = [{
-                    name: { $regex: search, $options: "i" }
-                }]
-
-        } else if (brand && !search) {
-            console.log("expecting this")
-            productSearchQuery.brand = brand
-        } else if (search && !brand) {
-            console.log("executing need to see in ter")
-            productSearchQuery.$or = [
-                {
-                    name: { $regex: search, $options: "i" }
-                },
-
-                {
-                    brand: { $regex: search, $options: "i" }
-                }
-            ]
-        }
-        console.dir(productSearchQuery, { depth: null, color: true })
-        products = await Product.find(productSearchQuery).populate({ path: "categoryId", match: { list: true } })
-        // console.log("products using the populate fetch->",products)  
-    }
-    let variants;
-
-    let priceFilter = {};
-
-    if (minPrice || maxPrice) {
-
-        priceFilter.salePrice = {};
-
-        if (minPrice) {
-            priceFilter.salePrice.$gte = Number(minPrice);
-        }
-
-        if (maxPrice) {
-            priceFilter.salePrice.$lte = Number(maxPrice);
-        }
-    }
-
-    if (color || price) {
-        searchQuery = {
-            list: true,
-            "$or": [
-                { color: color },
-                {
-                    salePrice: price
-                }
-            ]
-        }
-        variants = await ProductVariant.find({ ...searchQuery, ...priceFilter })
-    } else {
-        console.log("without searchQuery")
-        variants = await ProductVariant.find({ list: true, ...priceFilter })
-    }
-
-    // console.log(products)
-    // console.log(variants.length,"variants Length")
-
-
-    let matchedVariants = []
-    let matchedProduct = []
-    if (multipleCategory) {
-        multiplePrd.forEach((p) => {
-            variants.forEach((v) => {
-                if (p._id.toString() === v.productId.toString() && p.categoryId != null) {
-                    const exist = matchedProduct.some((s) => { return s._id.toString() === p._id.toString() })
-                    if (!exist) {
-                        matchedProduct.push(p)
-                        // console.log(p)
-                        // console.log("matchedProduct array->",matchedProduct)
-                    }
-                    // console.log("matchedVariants----->",matchedVariants)
-                    const variantExist = matchedVariants.some((mv) => {
-                        // console.log("matchedVariants->",matchedVariants)
-                        return mv.productId.toString() === v.productId.toString()
-                    })
-                    if (!variantExist) {
-                        matchedVariants.push(v)
-                        // console.log(v)
-
-                    }
-                }
-            })
-
-        })
-    } else {
-
-        products.forEach((p) => {
-            variants.forEach((v) => {
-                if (p._id.toString() === v.productId.toString() && p.categoryId != null) {
-                    const exist = matchedProduct.some((s) => { return s._id.toString() === p._id.toString() })
-                    if (!exist) {
-                        matchedProduct.push(p)
-                        // console.log(p)
-                        // console.log("matchedProduct array->",matchedProduct)
-                    }
-                    // console.log("matchedVariants----->",matchedVariants)
-                    const variantExist = matchedVariants.some((mv) => {
-                        // console.log("matchedVariants->",matchedVariants)
-                        return mv.productId.toString() === v.productId.toString()
-                    })
-                    if (!variantExist) {
-                        matchedVariants.push(v)
-                        // console.log(v)
-
-                    }
-                }
-            })
-
-        })
-    }
-
-
-    //   console.log("matchedProduct.length->",matchedProduct.length)
-    // console.log("matchedVariants.length->",matchedVariants.length)
-    const noOfProducts = matchedProduct.length
-    // console.log(noOfProducts)
-    const totalPages = Math.ceil(noOfProducts / limit)
-
-    const finalMatchedProduct = matchedProduct.slice(skip, (skip + limit))
-
-    let wishedProductIndexes = []
-
-    for (const [i, value] of finalMatchedProduct.entries()) {
-        // console.log(i)
-        const userWishlist = await Wishlist.findOne({ userId })
-        if (!userWishlist) {
-            break
-        }
-        const index = userWishlist.items.findIndex((item) => {
-            //   console.log(item.productId.toString(),value._id.toString())
-            return item.productId.toString() === value._id.toString()
-
-
-        })
-        if (index > -1) {
-            wishedProductIndexes.push(i)
-        }
-    }
-    // console.log(wishedProductIndexes)
-
-
-    let sortAlphabeticOrder = false;
-
-    if (sort === "Newest First") {
-        matchedVariants.sort((a, b) => { return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() })
-        // matchedVariants.sort((a,b)=>{return new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime()})
-    }
-    if (sort === "Oldest First") {
-        matchedVariants.sort((a, b) => { return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime() })
-        // matchedVariants.sort((a,b)=>{return new Date(a.createdAt).getTime()-new Date(b.createdAt).getTime()})
-    }
-    if (sort === "A-Z") {
-        console.log("executing A-Z");
-        finalMatchedProduct.sort((a, b) => { return a.name.localeCompare(b.name) })
-        sortAlphabeticOrder = true
-    }
-    if (sort === "Z-A") {
-        finalMatchedProduct.sort((a, b) => { return b.name.localeCompare(a.name) })
-        sortAlphabeticOrder = true
-    }
-    if (sort === "price_low") {
-        matchedVariants.sort((a, b) => { return a.salePrice - b.salePrice })
-    }
-    if (sort === "price_high") {
-        matchedVariants.sort((a, b) => { return b.salePrice - a.salePrice })
-    }
-
-
-    //-----listing  offer--------
-    console.log("after Sorting", matchedProduct, "after Sorting")
-
-    let offersOfEachProduct = []
-
-    for (let product of finalMatchedProduct) {
-        // console.log("product-->",product._id)
-
-        const categoryx = await Product.findOne({ _id: product._id }).populate("categoryId")
-        // console.log("category-->",categoryx)
-        const offerByCategory = await Offer.findOne({ categoryId: categoryx.categoryId._id, isActive: true })
-        const offerByProduct = await Offer.findOne({ productId: product._id, isActive: true })
-
-        if (offerByCategory && offerByProduct) {
-            if (offerByCategory.discountPercentage > offerByProduct.discountPercentage) {
-                const productOfOfferByCategory = await Product.find({ categoryId: offerByCategory.categoryId }).select('_id')
-                offersOfEachProduct.push({ offerPercentage: offerByCategory.discountPercentage, productId: productOfOfferByCategory })
-            } else {
-                const productOfOfferByProduct = await Product.findOne({ _id: offerByProduct.productId })
-                offersOfEachProduct.push({ offerPercentage: offerByProduct.discountPercentage, productId: [productOfOfferByProduct._id] })
+            if (cat) {
+                selectedCategories = [cat];
             }
         }
-        else if (offerByCategory) {
-            const productOfOfferByCategory = await Product.find({ categoryId: offerByCategory.categoryId }).select('_id')
-            offersOfEachProduct.push({ offerPercentage: offerByCategory.discountPercentage, productId: productOfOfferByCategory })
-        }
-        else if (offerByProduct) {
-            const productOfOfferByProduct = await Product.findOne({ _id: offerByProduct.productId })
-            offersOfEachProduct.push({ offerPercentage: offerByProduct.discountPercentage, productId: [productOfOfferByProduct._id] })
-        }
-
     }
 
-    console.log("offersOfEachProduct-->", offersOfEachProduct)
-  const categories = await Category.find({});
-    return {
-        offersOfEachProduct: offersOfEachProduct,
-        products: finalMatchedProduct,
-        eachProductVariant: matchedVariants,
-        sortAlphabeticOrder, totalPages,
-        currentPage: page, wishedProductIndexes,
-        categories
+    // -----------------------------------------
+    // STEP 3: PREPARE PRODUCT QUERY
+    // -----------------------------------------
+
+    const productSearchQuery = {
+        list: true
     };
 
+    if (cat) {
+        productSearchQuery.categoryId = cat._id;
+    } else if (multipleCategory) {
+        productSearchQuery.categoryId = {
+            $in: selectedCategories.map(c => c._id)
+        };
+    }
 
+    if (brand) {
+        productSearchQuery.brand = brand;
+    }
 
+    if (search) {
+        if (cat) {
+            // Preserve your existing category-search behavior.
+            productSearchQuery.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { search: { $regex: search, $options: "i" } }
+            ];
+        } else if (multipleCategory) {
+            productSearchQuery.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { search: { $regex: search, $options: "i" } }
+            ];
+        } else {
+            productSearchQuery.$or = [
+                { name: { $regex: search, $options: "i" } },
+                ...(brand
+                    ? []
+                    : [{ brand: { $regex: search, $options: "i" } }])
+            ];
+        }
+    }
 
+    // -----------------------------------------
+    // STEP 4: FETCH PRODUCTS
+    // -----------------------------------------
+
+    let products;
+
+    if (cat || multipleCategory) {
+        products = await Product.find(productSearchQuery);
+    } else {
+        products = await Product.find(productSearchQuery)
+            .populate({
+                path: "categoryId",
+                match: { list: true }
+            });
+
+        // Exclude products whose category is blocked.
+        products = products.filter(product => product.categoryId);
+    }
+
+    // If no products match, avoid unnecessary variant,
+    // wishlist and offer queries.
+    if (products.length === 0) {
+        const categories = await Category.find({});
+
+        return {
+            offersOfEachProduct: [],
+            products: [],
+            eachProductVariant: [],
+            sortAlphabeticOrder: sort === "A-Z" || sort === "Z-A",
+            totalPages: 0,
+            currentPage,
+            wishedProductIndexes: [],
+            categories
+        };
+    }
+
+    // -----------------------------------------
+    // STEP 5: FETCH ONLY RELEVANT VARIANTS
+    // -----------------------------------------
+
+    const productIds = products.map(product => product._id);
+
+    const variantQuery = {
+        list: true,
+        productId: { $in: productIds }
+    };
+
+    const variantFilters = [];
+
+    if (color) {
+        variantFilters.push({ color });
+    }
+
+    if (price) {
+        variantFilters.push({ salePrice: price });
+    }
+
+    // Preserve your original color OR price behavior.
+    if (variantFilters.length > 0) {
+        variantQuery.$or = variantFilters;
+    }
+
+    if (Object.keys(priceFilter).length > 0) {
+        variantQuery.salePrice = {
+            ...(variantQuery.salePrice || {}),
+            ...priceFilter
+        };
+    }
+
+    let variants = await ProductVariant.find(variantQuery);
+
+    // -----------------------------------------
+    // STEP 6: APPLY VARIANT SORTING
+    // -----------------------------------------
+
+    if (sort === "Newest First") {
+        variants.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+    } else if (sort === "Oldest First") {
+        variants.sort(
+            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
+    } else if (sort === "price_low") {
+        variants.sort((a, b) => a.salePrice - b.salePrice);
+    } else if (sort === "price_high") {
+        variants.sort((a, b) => b.salePrice - a.salePrice);
+    }
+
+    // -----------------------------------------
+    // STEP 7: MATCH PRODUCTS AND VARIANTS
+    // -----------------------------------------
+
+    // Keep one matching variant per product, as in your
+    // existing service. The first matching variant wins.
+    const variantMap = new Map();
+
+    for (const variant of variants) {
+        const productId = variant.productId.toString();
+
+        if (!variantMap.has(productId)) {
+            variantMap.set(productId, variant);
+        }
+    }
+
+    const productMap = new Map(
+        products.map(product => [
+            product._id.toString(),
+            product
+        ])
+    );
+
+    const matchedProduct = [];
+    const matchedVariants = [];
+
+    for (const [productId, variant] of variantMap) {
+        const product = productMap.get(productId);
+
+        if (product) {
+            matchedProduct.push(product);
+            matchedVariants.push(variant);
+        }
+    }
+
+    // -----------------------------------------
+    // STEP 8: SORT PRODUCTS CONSISTENTLY
+    // -----------------------------------------
+
+    const sortAlphabeticOrder =
+        sort === "A-Z" || sort === "Z-A";
+
+    if (sort === "A-Z") {
+        matchedProduct.sort((a, b) =>
+            a.name.localeCompare(b.name)
+        );
+    } else if (sort === "Z-A") {
+        matchedProduct.sort((a, b) =>
+            b.name.localeCompare(a.name)
+        );
+    } else if (
+        sort === "Newest First" ||
+        sort === "Oldest First" ||
+        sort === "price_low" ||
+        sort === "price_high"
+    ) {
+        const variantByProductId = new Map(
+            matchedVariants.map(variant => [
+                variant.productId.toString(),
+                variant
+            ])
+        );
+
+        matchedProduct.sort((a, b) => {
+            const variantA = variantByProductId.get(
+                a._id.toString()
+            );
+
+            const variantB = variantByProductId.get(
+                b._id.toString()
+            );
+
+            if (sort === "Newest First") {
+                return new Date(variantB.createdAt) -
+                    new Date(variantA.createdAt);
+            }
+
+            if (sort === "Oldest First") {
+                return new Date(variantA.createdAt) -
+                    new Date(variantB.createdAt);
+            }
+
+            if (sort === "price_low") {
+                return variantA.salePrice - variantB.salePrice;
+            }
+
+            return variantB.salePrice - variantA.salePrice;
+        });
+    }
+
+    // Keep variants aligned with the sorted products.
+    const variantByProductId = new Map(
+        matchedVariants.map(variant => [
+            variant.productId.toString(),
+            variant
+        ])
+    );
+
+    const sortedVariants = matchedProduct.map(product =>
+        variantByProductId.get(product._id.toString())
+    );
+
+    // -----------------------------------------
+    // STEP 9: PAGINATION
+    // -----------------------------------------
+
+    const noOfProducts = matchedProduct.length;
+    const totalPages = Math.ceil(noOfProducts / limit);
+
+    const finalMatchedProduct = matchedProduct.slice(
+        skip,
+        skip + limit
+    );
+
+    const eachProductVariant = sortedVariants.slice(
+        skip,
+        skip + limit
+    );
+
+    // -----------------------------------------
+    // STEP 10: FETCH WISHLIST ONCE
+    // -----------------------------------------
+
+    let wishedProductIndexes = [];
+
+    if (userId) {
+        const userWishlist = await Wishlist.findOne({
+            userId
+        }).select("items.productId");
+
+        if (userWishlist) {
+            const wishlistedProductIds = new Set(
+                userWishlist.items.map(item =>
+                    item.productId.toString()
+                )
+            );
+
+            finalMatchedProduct.forEach((product, index) => {
+                if (wishlistedProductIds.has(product._id.toString())) {
+                    wishedProductIndexes.push(index);
+                }
+            });
+        }
+    }
+
+    // -----------------------------------------
+    // STEP 11: FETCH OFFERS IN BATCHES
+    // -----------------------------------------
+
+    const pageProductIds = finalMatchedProduct.map(
+        product => product._id
+    );
+
+    const pageCategoryIds = [
+        ...new Set(
+            finalMatchedProduct
+                .map(product => {
+                    const categoryId = product.categoryId;
+
+                    return categoryId && categoryId._id
+                        ? categoryId._id.toString()
+                        : categoryId
+                            ? categoryId.toString()
+                            : null;
+                })
+                .filter(Boolean)
+        )
+    ];
+
+    let offers = [];
+
+    const offerConditions = [];
+
+    if (pageProductIds.length > 0) {
+        offerConditions.push({
+            productId: { $in: pageProductIds }
+        });
+    }
+
+    if (pageCategoryIds.length > 0) {
+        offerConditions.push({
+            categoryId: { $in: pageCategoryIds }
+        });
+    }
+
+    if (offerConditions.length > 0) {
+        offers = await Offer.find({
+            isActive: true,
+            $or: offerConditions
+        });
+    }
+
+    const productOfferMap = new Map();
+    const categoryOfferMap = new Map();
+
+    for (const offer of offers) {
+        if (offer.productId) {
+            const productId = offer.productId._id
+                ? offer.productId._id.toString()
+                : offer.productId.toString();
+
+            productOfferMap.set(productId, offer);
+        }
+
+        if (offer.categoryId) {
+            const categoryId = offer.categoryId._id
+                ? offer.categoryId._id.toString()
+                : offer.categoryId.toString();
+
+            categoryOfferMap.set(categoryId, offer);
+        }
+    }
+
+    const offersOfEachProduct = [];
+
+    for (const product of finalMatchedProduct) {
+        const productId = product._id.toString();
+
+        const categoryId = product.categoryId
+            ? (
+                product.categoryId._id
+                    ? product.categoryId._id.toString()
+                    : product.categoryId.toString()
+            )
+            : null;
+
+        const productOffer = productOfferMap.get(productId);
+        const categoryOffer = categoryId
+            ? categoryOfferMap.get(categoryId)
+            : null;
+
+        let selectedOffer = null;
+
+        if (productOffer && categoryOffer) {
+            selectedOffer =
+                categoryOffer.discountPercentage >
+                productOffer.discountPercentage
+                    ? categoryOffer
+                    : productOffer;
+        } else if (productOffer) {
+            selectedOffer = productOffer;
+        } else if (categoryOffer) {
+            selectedOffer = categoryOffer;
+        }
+
+        if (selectedOffer) {
+            offersOfEachProduct.push({
+                offerPercentage: selectedOffer.discountPercentage,
+                productId: [{ _id: product._id }]
+            });
+        }
+    }
+
+    // -----------------------------------------
+    // STEP 12: FETCH CATEGORIES FOR THE DROPDOWN
+    // -----------------------------------------
+
+    const categories = await Category.find({});
+
+    // -----------------------------------------
+    // STEP 13: RETURN EXISTING EJS VARIABLES
+    // -----------------------------------------
+
+    return {
+        offersOfEachProduct,
+        products: finalMatchedProduct,
+        eachProductVariant,
+        sortAlphabeticOrder,
+        totalPages,
+        currentPage,
+        wishedProductIndexes,
+        categories
+    };
 };
+
 
 
 

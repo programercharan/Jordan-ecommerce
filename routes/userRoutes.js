@@ -76,7 +76,6 @@ Router.post("/payment/wallet",walletPaymentController);
 Router.get("/getAddress/:id",getAddress)//edit address
 Router.post("/order/place",orderPlaceController)//COD
 
-
 Router.get("/orders",Checksession, ordersPage);
 Router.get("/orders/:id", Checksession, userOrderDetails);//order-details-page
 Router.get("/order/success/:id", Checksession,orderSuccessMiddleware, orderSuccessPage);
