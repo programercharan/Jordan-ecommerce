@@ -3623,250 +3623,72 @@ export const generateSalesReportPDF = (report, res) => {
 };
 
 
+
 export const getAdminDashboardService = async (filter) => {
 
-    let chart = {
+
+    const chart = {
         labels: [],
         sales: []
     };
 
-    let highestProducts = {};
-    let highestBrand = {};
-    let highestProductPrice = {};
+    const highestProducts = {};
+    const highestBrand = {};
+    const highestProductPrice = {};
 
     let totalOrders = 0;
     let totalItems = 0;
 
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+
+    let startDate;
+    let endDate;
 
     // =========================================
-    // YEARLY
+    // STEP 1: PREPARE THE DATE RANGE AND LABELS
     // =========================================
 
     if (filter === "yearly") {
 
-        const currentYear = new Date().getFullYear();
+        const firstYear = currentYear - 4;
 
-        // Last 5 years
-        for (let year = currentYear - 4; year <= currentYear; year++) {
+        startDate = new Date(firstYear, 0, 1);
+        endDate = new Date(currentYear + 1, 0, 1);
 
+        for (
+            let year = firstYear;
+            year <= currentYear;
+            year++
+        ) {
             chart.labels.push(String(year));
-
-            const start = new Date(year, 0, 1);
-            start.setHours(0, 0, 0, 0);
-
-            const end = new Date(year + 1, 0, 1);
-            end.setHours(0, 0, 0, 0);
-
-
-            const orders = await Order.find({
-
-                $or: [
-                    { paymentMethod: "Razorpay", paymentStatus: "Paid" },
-                    { paymentMethod: "Wallet", paymentStatus: "Paid" },
-                    { paymentMethod: "Cash on Delivery", paymentStatus: "Paid" }
-                ],
-
-                createdAt: {
-                    $gte: start,
-                    $lt: end
-                }
-
-            });
-
-
-            totalOrders += orders.length;
-
-
-            let salesAmount = 0;
-            let itemsCount = 0;
-
-
-            for (let order of orders) {
-
-                salesAmount += Number(order.grandTotal || 0);
-
-
-                for (let item of order.orderItems) {
-
-                    if (
-                        item.itemStatus === "Cancelled" ||
-                        item.itemStatus === "Returned"
-                    ) {
-                        continue;
-                    }
-
-
-                    itemsCount += Number(item.quantity || 0);
-
-
-                    highestProducts[item.productName] =
-                        (highestProducts[item.productName] || 0)
-                        + Number(item.quantity || 0);
-
-                    highestProductPrice[item.productName] =
-                        (highestProductPrice[item.productName] || 0)
-                        + Number(item.paidAmount || 0) * Number(item.quantity || 0);
-
-                    const variant =
-                        await ProductVariant
-                            .findOne({ _id: item.variantId })
-                            .populate("productId");
-
-
-                    if (variant && variant.productId) {
-
-                        const brand =
-                            variant.productId.brand;
-
-
-                        highestBrand[brand] =
-                            (highestBrand[brand] || 0)
-                            + Number(item.quantity || 0);
-                    }
-
-                }
-
-            }
-
-
-            totalItems += itemsCount;
-
-            chart.sales.push(salesAmount);
-
         }
 
-    }
+    } else if (filter === "monthly") {
 
-
-    // =========================================
-    // MONTHLY
-    // =========================================
-
-    else if (filter === "monthly") {
+        startDate = new Date(currentYear, 0, 1);
+        endDate = new Date(currentYear + 1, 0, 1);
 
         chart.labels = [
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec"
+            "Jan", "Feb", "Mar", "Apr",
+            "May", "Jun", "Jul", "Aug",
+            "Sep", "Oct", "Nov", "Dec"
         ];
 
-        const currentYear = new Date().getFullYear();
+    } else if (filter === "weekly") {
 
-        for (let month = 0; month < 12; month++) {
+        startDate = new Date(
+            currentYear,
+            currentMonth,
+            1
+        );
 
-            const start = new Date(
-                currentYear,
-                month,
-                1
-            );
-
-            start.setHours(0, 0, 0, 0);
-
-
-            const end = new Date(
-                currentYear,
-                month + 1,
-                1
-            );
-
-            end.setHours(0, 0, 0, 0);
-
-
-            const orders = await Order.find({
-
-                $or: [
-                    { paymentMethod: "Razorpay", paymentStatus: "Paid" },
-                    { paymentMethod: "Wallet", paymentStatus: "Paid" },
-                    { paymentMethod: "Cash on Delivery", paymentStatus: "Paid" }
-                ],
-
-                createdAt: {
-                    $gte: start,
-                    $lt: end
-                }
-
-            });
-
-
-            totalOrders += orders.length;
-
-
-            let salesAmount = 0;
-            let itemsCount = 0;
-
-
-            for (let order of orders) {
-
-                salesAmount += Number(order.grandTotal || 0);
-
-
-                for (let item of order.orderItems) {
-
-                    if (
-                        item.itemStatus === "Cancelled" ||
-                        item.itemStatus === "Returned"
-                    ) {
-                        continue;
-                    }
-
-
-                    itemsCount += Number(item.quantity || 0);
-
-
-                    highestProducts[item.productName] =
-                        (highestProducts[item.productName] || 0)
-                        + Number(item.quantity || 0);
-
-                    highestProductPrice[item.productName] =
-                        (highestProductPrice[item.productName] || 0)
-                        + Number(item.paidAmount || 0) * Number(item.quantity || 0);
-
-
-                    const variant =
-                        await ProductVariant
-                            .findOne({ _id: item.variantId })
-                            .populate("productId");
-
-
-                    if (variant && variant.productId) {
-
-                        const brand =
-                            variant.productId.brand;
-
-
-                        highestBrand[brand] =
-                            (highestBrand[brand] || 0)
-                            + Number(item.quantity || 0);
-                    }
-
-                }
-
-            }
-
-
-            totalItems += itemsCount;
-
-            chart.sales.push(salesAmount);
-
-        }
-
-    }
-
-
-    // =========================================
-    // WEEKLY
-    // =========================================
-
-    else if (filter === "weekly") {
+        endDate = new Date(
+            currentYear,
+            currentMonth + 1,
+            1
+        );
 
         chart.labels = [
             "Week 1",
@@ -3875,144 +3697,22 @@ export const getAdminDashboardService = async (filter) => {
             "Week 4"
         ];
 
-        const now = new Date();
+    } else if (filter === "daily") {
 
-        const currentYear = now.getFullYear();
-        const currentMonth = now.getMonth();
+        const dayOfWeek = now.getDay();
 
+        // Monday = beginning of the week
+        const daysFromMonday =
+            dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 
-        const weekRanges = [
-            [1, 8],
-            [8, 15],
-            [15, 22],
-            [22, new Date(currentYear, currentMonth + 1, 1)]
-        ];
+        startDate = new Date(now);
+        startDate.setDate(
+            now.getDate() - daysFromMonday
+        );
+        startDate.setHours(0, 0, 0, 0);
 
-
-        for (let i = 0; i < weekRanges.length; i++) {
-
-            const startDay = weekRanges[i][0];
-            const endDay = weekRanges[i][1];
-
-
-            const start = new Date(
-                currentYear,
-                currentMonth,
-                startDay
-            );
-
-            start.setHours(0, 0, 0, 0);
-
-
-            let end;
-
-            if (i === 3) {
-
-                // End of the current month
-                end = new Date(
-                    currentYear,
-                    currentMonth + 1,
-                    1
-                );
-
-            } else {
-
-                end = new Date(
-                    currentYear,
-                    currentMonth,
-                    endDay
-                );
-
-            }
-
-            end.setHours(0, 0, 0, 0);
-
-
-            const orders = await Order.find({
-
-                $or: [
-                    { paymentMethod: "Razorpay", paymentStatus: "Paid" },
-                    { paymentMethod: "Wallet", paymentStatus: "Paid" },
-                    { paymentMethod: "Cash on Delivery", paymentStatus: "Paid" }
-                ],
-
-                createdAt: {
-                    $gte: start,
-                    $lt: end
-                }
-
-            });
-
-
-            totalOrders += orders.length;
-
-
-            let salesAmount = 0;
-            let itemsCount = 0;
-
-
-            for (let order of orders) {
-
-                salesAmount += Number(order.grandTotal || 0);
-
-
-                for (let item of order.orderItems) {
-
-                    if (
-                        item.itemStatus === "Cancelled" ||
-                        item.itemStatus === "Returned"
-                    ) {
-                        continue;
-                    }
-
-
-                    itemsCount += Number(item.quantity || 0);
-
-
-                    highestProducts[item.productName] =
-                        (highestProducts[item.productName] || 0)
-                        + Number(item.quantity || 0);
-
-
-                    highestProductPrice[item.productName] =
-                        (highestProductPrice[item.productName] || 0)
-                        + Number(item.paidAmount || 0);
-
-
-                    const variant =
-                        await ProductVariant
-                            .findOne({ _id: item.variantId })
-                            .populate("productId");
-
-
-                    if (variant && variant.productId) {
-
-                        const brand = variant.productId.brand;
-
-                        highestBrand[brand] =
-                            (highestBrand[brand] || 0)
-                            + Number(item.quantity || 0);
-                    }
-
-                }
-
-            }
-
-
-            totalItems += itemsCount;
-
-            chart.sales.push(salesAmount);
-
-        }
-
-    }
-
-
-    // =========================================
-    // DAILY
-    // =========================================
-
-    if (filter === "daily") {
+        endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 7);
 
         chart.labels = [
             "Monday",
@@ -4023,202 +3723,291 @@ export const getAdminDashboardService = async (filter) => {
             "Saturday",
             "Sunday"
         ];
-
-        const now = new Date();
-
-        const currentDay = now.getDay();
-
-        // JavaScript:
-        // Sunday = 0
-        // Monday = 1
-        // Tuesday = 2
-        // ...
-        // Saturday = 6
-
-        const monday = new Date(now);
-
-        const daysFromMonday = currentDay === 0
-            ? 6
-            : currentDay - 1;
-
-        monday.setDate(now.getDate() - daysFromMonday);
-
-        monday.setHours(0, 0, 0, 0);
-
-
-        for (let day = 0; day < 7; day++) {
-
-            const start = new Date(monday);
-
-            start.setDate(monday.getDate() + day);
-
-
-            const end = new Date(start);
-
-            end.setDate(start.getDate() + 1);
-
-
-            end.setHours(0, 0, 0, 0);
-
-
-
-
-
-            const orders = await Order.find({
-
-                $or: [
-                    { paymentMethod: "Razorpay", paymentStatus: "Paid" },
-                    { paymentMethod: "Wallet", paymentStatus: "Paid" },
-                    { paymentMethod: "Cash on Delivery", paymentStatus: "Paid" }
-                ],
-
-                createdAt: {
-                    $gte: start,
-                    $lt: end
-                }
-
-            });
-
-
-            totalOrders += orders.length;
-
-
-            let salesAmount = 0;
-            let itemsCount = 0;
-
-
-            for (let order of orders) {
-
-                salesAmount += Number(order.grandTotal || 0);
-
-
-                for (let item of order.orderItems) {
-
-                    if (
-                        item.itemStatus === "Cancelled" ||
-                        item.itemStatus === "Returned"
-                    ) {
-                        continue;
-                    }
-
-
-                    itemsCount += Number(item.quantity || 0);
-
-
-                    highestProducts[item.productName] =
-                        (highestProducts[item.productName] || 0)
-                        + Number(item.quantity || 0);
-
-
-                    highestProductPrice[item.productName] =
-                        (highestProductPrice[item.productName] || 0)
-                        + Number(item.paidAmount || 0);
-
-
-                    const variant =
-                        await ProductVariant
-                            .findOne({ _id: item.variantId })
-                            .populate("productId");
-
-
-                    if (variant && variant.productId) {
-
-                        const brand = variant.productId.brand;
-
-                        highestBrand[brand] =
-                            (highestBrand[brand] || 0)
-                            + Number(item.quantity || 0);
-                    }
-
-                }
-
-            }
-
-
-            totalItems += itemsCount;
-
-            chart.sales.push(salesAmount);
-
-        }
-
     }
 
+    // =========================================
+    // STEP 2: FETCH ALL REQUIRED ORDERS ONCE
+    // =========================================
 
+    const orders = await Order.find({
 
-    // GET TOTAL USERS
+        paymentMethod: {
+            $in: [
+                "Razorpay",
+                "Wallet",
+                "Cash on Delivery"
+            ]
+        },
+
+        paymentStatus: "Paid",
+
+        createdAt: {
+            $gte: startDate,
+            $lt: endDate
+        }
+
+    });
+
+    // =========================================
+    // STEP 3: COLLECT VARIANT IDs
+    // =========================================
+
+    const variantIds = new Set();
+
+    for (const order of orders) {
+
+        for (const item of order.orderItems || []) {
+
+            // Cancelled and returned items are
+            // excluded from product/brand rankings.
+            if (
+                item.itemStatus === "Cancelled" ||
+                item.itemStatus === "Returned"
+            ) {
+                continue;
+            }
+
+            if (item.variantId) {
+
+                const variantId = item.variantId._id
+                    ? item.variantId._id.toString()
+                    : item.variantId.toString();
+
+                variantIds.add(variantId);
+            }
+        }
+    }
+
+    // =========================================
+    // STEP 4: FETCH ALL VARIANTS IN ONE QUERY
+    // =========================================
+
+    let variants = [];
+
+    if (variantIds.size > 0) {
+
+        variants = await ProductVariant.find({
+            _id: {
+                $in: [...variantIds]
+            }
+        }).populate("productId");
+    }
+
+    // =========================================
+    // STEP 5: CREATE THE VARIANT MAP
+    // =========================================
+
+    const variantMap = new Map();
+
+    for (const variant of variants) {
+
+        variantMap.set(
+            variant._id.toString(),
+            variant
+        );
+    }
+
+    // =========================================
+    // STEP 6: PREPARE CHART SALES
+    // =========================================
+
+    const salesByPeriod = Array(
+        chart.labels.length
+    ).fill(0);
+
+    // =========================================
+    // STEP 7: PROCESS ORDERS AND ORDER ITEMS
+    // =========================================
+
+    for (const order of orders) {
+
+        const orderDate = new Date(order.createdAt);
+
+        let periodIndex;
+
+        if (filter === "yearly") {
+
+            periodIndex =
+                orderDate.getFullYear() -
+                (currentYear - 4);
+
+        } else if (filter === "monthly") {
+
+            periodIndex = orderDate.getMonth();
+
+        } else if (filter === "weekly") {
+
+            const day = orderDate.getDate();
+
+            if (day <= 7) {
+                periodIndex = 0;
+            } else if (day <= 14) {
+                periodIndex = 1;
+            } else if (day <= 21) {
+                periodIndex = 2;
+            } else {
+                periodIndex = 3;
+            }
+
+        } else if (filter === "daily") {
+
+            // Monday = 0, Tuesday = 1, ..., Sunday = 6
+            periodIndex =
+                (orderDate.getDay() + 6) % 7;
+        }
+
+        totalOrders++;
+
+        // Preserve your existing chart calculation:
+        // add the full order grandTotal.
+        if (
+            periodIndex >= 0 &&
+            periodIndex < salesByPeriod.length
+        ) {
+            salesByPeriod[periodIndex] +=
+                Number(order.grandTotal || 0);
+        }
+
+        for (const item of order.orderItems || []) {
+
+            // Exclude cancelled and returned items
+            // from item/product/brand calculations.
+            if (
+                item.itemStatus === "Cancelled" ||
+                item.itemStatus === "Returned"
+            ) {
+                continue;
+            }
+
+            const quantity = Number(item.quantity || 0);
+
+            totalItems += quantity;
+
+            // =====================================
+            // TOP-SELLING PRODUCTS
+            // =====================================
+
+            highestProducts[item.productName] =
+                (highestProducts[item.productName] || 0)
+                + quantity;
+
+            // =====================================
+            // PRODUCT SALES AMOUNT
+            // =====================================
+
+            const paidAmount = Number(
+                item.paidAmount || 0
+            );
+
+            if (
+                filter === "yearly" ||
+                filter === "monthly"
+            ) {
+
+                highestProductPrice[item.productName] =
+                    (highestProductPrice[item.productName] || 0)
+                    + paidAmount * quantity;
+
+            } else {
+
+                // Preserves your existing weekly/daily logic.
+                highestProductPrice[item.productName] =
+                    (highestProductPrice[item.productName] || 0)
+                    + paidAmount;
+            }
+
+            // =====================================
+            // TOP-SELLING BRANDS
+            // =====================================
+
+            // Get the variant from the Map.
+            // No additional MongoDB query here.
+            const variantId = item.variantId
+                ? (
+                    item.variantId._id
+                        ? item.variantId._id.toString()
+                        : item.variantId.toString()
+                )
+                : null;
+
+            const variant = variantId
+                ? variantMap.get(variantId)
+                : null;
+
+            if (!variant || !variant.productId) {
+                continue;
+            }
+
+            const brand = variant.productId.brand;
+
+            if (!brand) {
+                continue;
+            }
+
+            highestBrand[brand] =
+                (highestBrand[brand] || 0)
+                + quantity;
+        }
+    }
+
+    // =========================================
+    // STEP 8: ASSIGN CHART SALES
+    // =========================================
+
+    chart.sales = salesByPeriod;
+
+    // =========================================
+    // STEP 9: GET TOTAL USERS
+    // =========================================
 
     const totalUsers = await User.countDocuments();
 
+    // =========================================
+    // STEP 10: SORT BEST-SELLING PRODUCTS
+    // =========================================
 
-    // SORT PRODUCTS
+    const sortedHighestProducts =
+        Object.entries(highestProducts)
+            .sort((a, b) => b[1] - a[1]);
 
-    const sortedHighestProducts = Object.entries(highestProducts).sort((a, b) => b[1] - a[1]);
-
-    let bestSellingProducts = [];
-
-
-    for (let product of sortedHighestProducts) {
-
-        bestSellingProducts.push({
-
+    const bestSellingProducts =
+        sortedHighestProducts.map(product => ({
             productName: product[0],
-
             quantity: product[1],
-
             sales: highestProductPrice[product[0]]
+        }));
 
-        });
-
-    }
-
-
-    // SORT BRANDS
+    // =========================================
+    // STEP 11: SORT BEST-SELLING BRANDS
+    // =========================================
 
     const sortedHighestBrands =
         Object.entries(highestBrand)
             .sort((a, b) => b[1] - a[1]);
 
-
-    let bestSellingBrands = [];
-
-
-    for (let brand of sortedHighestBrands) {
-
-        bestSellingBrands.push({
-
+    const bestSellingBrands =
+        sortedHighestBrands.map(brand => ({
             _id: brand[0],
-
             quantity: brand[1],
-
             sales: 0
+        }));
 
-        });
-
-    }
-
-
-    // RETURN
+    // =========================================
+    // STEP 12: RETURN DASHBOARD DATA
+    // =========================================
 
     return {
         success: true,
-
         filter,
-
         totalOrders,
-
         totalUsers,
-
         totalItems,
-
         chart,
-
         bestSellingProducts,
-
         bestSellingBrands
-
     };
-
 };
+
 
 export const deleteCouponService = async (couponId) => {
 
